@@ -1,0 +1,32 @@
+{
+    "compilerOptions": {
+        "target": "ESNext", // Target the latest ECMAScript version, i.e. what version of javascript to compile into. 
+        "module": "ESNext", // Use ESNext module system for Vite, which module system the compiled javascript should use. 
+        "moduleResolution": "node", // Resolve modules in the Node.js style
+        "strict": true, // Enable strict type-checking options
+        "esModuleInterop": true, // Allow interoperability between CommonJS and ES modules
+        "skipLibCheck": true, // Skip type checking for all declaration files (*.d.ts)
+        "forceConsistentCasingInFileNames": true, // Ensure consistent casing in import paths
+        "sourceMap": true, // Enable source maps for easier debugging
+        "outDir": "dist", // Output directory for compiled files
+        "baseUrl": ".", // Base directory to resolve non-relative module names
+        "paths": {
+            "@/*": [
+                "./*"
+            ] // Path alias to simplify imports
+        },
+        "lib": [
+            "ESNext",
+            "DOM"
+        ], // Include standard library files (DOM for browser APIs)
+        "resolveJsonModule": true, // Allow importing JSON files as modules
+        "allowSyntheticDefaultImports": true // Allow default imports from modules with no default export
+    },
+    "include": [
+        "./"
+    ], // Include all files in the src directory
+    "exclude": [
+        "node_modules",
+        "dist"
+    ] // Exclude node_modules and dist folders
+}
