@@ -20,7 +20,7 @@ export class Egg implements GameObject {
     }
 
     getCollisionBox(): CollisionBox {
-        return { y1: this.pos.y, x1: this.pos.x, x2: this.pos.x + 18, y2: this.pos.y + 16 }
+        return { y1: this.pos.y, x1: this.pos.x, x2: this.pos.x + 12, y2: this.pos.y + 16 }
     }
 
     draw(ctx: CanvasRenderingContext2D) {
@@ -29,7 +29,7 @@ export class Egg implements GameObject {
     }
 
     // Connects this egg to a certain position. Used for when mario is holding the egg
-    connect() {
+    pickUp() {
 
         this.isPickedUp = true;
     }

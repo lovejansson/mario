@@ -101,6 +101,8 @@ function getCollisionPoint(obj1: GameObject, obj2: GameObject): "east" | "west" 
 
     // Checks if any combination of x and y of obj1 is within/in between obj2's area. 
 
+
+
     if (!(box1.x1 > box2.x2 || box1.x2 < box2.x1 || box1.y1 > box2.y2 || box1.y2 < box2.y1)) {
         if (isInInterval(box1.y2, { start: box2.y1, end: box2.y2 })) {
             return "south"

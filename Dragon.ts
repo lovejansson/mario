@@ -10,7 +10,6 @@ interface DragonState {
     update: (dragon: Dragon, elapsedMillis: number) => void;
 }
 
-
 /**
  * Dragon's idle state
  * 
