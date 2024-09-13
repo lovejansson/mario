@@ -83,7 +83,7 @@ class DragonWalkingState implements DragonState {
 
             // If the dragon moves backwards it is supposed to do a little jump
             if (dragon.vel.x === 1) {
-                dragon.movingState = new DragonJumpingState(elapsedMillis);
+                dragon.movingState = new DragonJumpingState();
 
                 // When dragon moves forward it is supposed to stop and shoot an egg
             } else {
@@ -105,45 +105,43 @@ class DragonWalkingState implements DragonState {
  * - After jump is done -> DragonJumpingState
  */
 class DragonJumpingState implements DragonState {
-    private startMillis: number;
 
-    constructor(startMillis: number) {
-        this.startMillis = startMillis;
+    private frame: number;
+
+    constructor() {
+        this.frame = 0;
 
     }
     update(dragon: Dragon, elapsedMillis: number) {
 
-        const y = this.getJumpPos(elapsedMillis - this.startMillis);
-
         dragon.vel.x = 0;
 
+        // Determine velocity y
 
+        const g = 1;
+        const vi = -6;
+
+        // Calculates the velocity vf = vi + at where vi is the initial jump velocity above and a is the gravity that pulls mario 1 pixel downwards. t is the number of frames. 
+        dragon.vel.y = vi + (g * this.frame);
+
+        const y = dragon.pos.y + dragon.vel.y;
 
         if (y > START_POS.y) {
+            // Jump is done
             dragon.movingState = new DragonIdleState(elapsedMillis);
             dragon.pos.y = START_POS.y;
+            dragon.vel.y = 0;
+
         } else {
             dragon.pos.y = y;
+            this.frame++;
         }
 
-        dragon.pos.x += dragon.vel.x;
 
         const assetHandler = AssetHandler.getInstance();
 
         dragon.asset = assetHandler.get("dragon-0")
     };
-
-    private getJumpPos(jumpMillis: number) {
-        /* 
-            f(t) = at² + bt + c
-            f(t) is the vertical position, relative to the ground
-            t is the time since the start of the jump
-            a relates to gravity (it's negative, because it points downwards)
-            b relates to velocity, or more specifically, the initial jump velocity (it's positive, because it points upwards)
-        */
-        const t = jumpMillis / 100;
-        return Math.round(START_POS.y - (15 * t - 5 * Math.pow(t, 2)));
-    }
 }
 
 
@@ -196,11 +194,8 @@ class DragonShootingState implements DragonState {
 
 class DragonHurtingState implements DragonState {
     update(dragon: Dragon, elapsedMillis: number) {
-
         const assetHandler = AssetHandler.getInstance();
-
         dragon.asset = assetHandler.get("dragon-0")
-
     };
 }
 

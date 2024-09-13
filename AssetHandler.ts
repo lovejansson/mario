@@ -30,12 +30,12 @@ export default class AssetHandler {
             const image = new Image();
             const loadPromise = new Promise<[string, HTMLImageElement]>((resolve, reject) => {
                 image.addEventListener("load", () => {
+                    console.dir(image)
                     resolve([name, image]);
                 });
 
                 image.addEventListener("error", (e) => {
                     reject(new LoadAssetError(name, path, e.error));
-
                 });
 
             });
@@ -45,6 +45,8 @@ export default class AssetHandler {
 
             try {
                 const loadedAssets = await Promise.all(loadPromises);
+
+
                 this.assets = new Map(loadedAssets);
 
             } catch (e) {
