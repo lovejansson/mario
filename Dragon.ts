@@ -1,7 +1,7 @@
 import AssetHandler from "./AssetHandler";
 import { Egg } from "./Egg";
 import { gameObjects } from "./globalState";
-import { GameObject, Collision, CollisionBox, GameObjectKind, Point, KeyState } from "./types";
+import { GameObject, Collision, CollisionBox, GameObjectKind, Point, KeyState, ConnectedObjects } from "./types";
 
 
 const START_POS: Point = { y: 135 - 47, x: 250 };
@@ -201,6 +201,7 @@ class DragonHurtingState implements DragonState {
 
 
 export class Dragon implements GameObject {
+    id: string;
     kind: GameObjectKind = GameObjectKind.DRAGON;
     pos: Point;
     vel: Point;
@@ -215,6 +216,7 @@ export class Dragon implements GameObject {
         this.movingState = new DragonIdleState(0);
         this.shootingState = null;
         this.asset = null;
+        this.id = "dragon";
     }
 
     init() {
@@ -228,7 +230,7 @@ export class Dragon implements GameObject {
         return { y1: this.pos.y, x1: this.pos.x, x2: this.pos.x + 32, y2: this.pos.y + 48 }
     }
 
-    update(elapsedMillis: number, _: KeyState, collisions: Collision[]) {
+    update(elapsedMillis: number, _: KeyState, collisions: Collision[], connections: ConnectedObjects) {
         this.movingState.update(this, elapsedMillis);
     }
 

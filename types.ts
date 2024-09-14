@@ -10,6 +10,7 @@ export const enum GameObjectKind {
 }
 
 export interface GameObject {
+    id: string;
     kind: GameObjectKind,
     pos: Point;
     vel: Point;
@@ -17,8 +18,10 @@ export interface GameObject {
     getCollisionBox: () => CollisionBox;
     init: () => void;
     draw: (ctx: CanvasRenderingContext2D) => void;
-    update: (elapsedMillis: number, keys: KeyState, collisions: Collision[]) => boolean | void;
+    update: (elapsedMillis: number, keys: KeyState, collisions: Collision[], connections: ConnectedObjects) => boolean | void;
 }
+
+export type ConnectedObjects = [[string, string]];
 
 export type Collision = {
     obj: GameObject,

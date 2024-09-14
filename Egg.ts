@@ -1,8 +1,9 @@
 import AssetHandler from "./AssetHandler";
-import { GameObject, Collision, CollisionBox, GameObjectKind, Point, KeyState } from "./types";
+import { GameObject, Collision, CollisionBox, GameObjectKind, Point, KeyState, ConnectedObjects } from "./types";
 
 export class Egg implements GameObject {
 
+    id: string;
     pos: Point;
     vel: Point;
     kind: GameObjectKind = GameObjectKind.EGG;
@@ -17,6 +18,7 @@ export class Egg implements GameObject {
         this.isPickedUp = false;
         this.isThrowed = false;
         this.frame = 0;
+        this.id = "egg" + Date.now().toString();
     }
 
     init() {
@@ -46,7 +48,13 @@ export class Egg implements GameObject {
         this.frame = 0;
     }
 
-    update(_: number, __: KeyState, ___: Collision[]) {
+    update(_: number, __: KeyState, collisions: Collision[], connections: ConnectedObjects) {
+
+        const dragonCollision = collisions.find(c => c.obj.id === "dragon");
+
+        if (dragonCollision && dragonCollision.obj) {
+
+        }
 
         if (this.isThrowed) {
             if (this.frame % 2 === 0) {

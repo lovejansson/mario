@@ -1,8 +1,8 @@
 import AssetHandler from "./AssetHandler";
-import { gameObjects, keys, reassignGameObjects } from "./globalState";
+import { connections, gameObjects, keys, reassignGameObjects } from "./globalState";
 import { Mario } from "./Mario";
 import { Dragon } from "./Dragon";
-import { GameObject, Collision, Point } from "./types";
+import { GameObject, Collision } from "./types";
 
 const listenToKeys = ["a", "d", "s", " ", "ö"]
 
@@ -64,7 +64,8 @@ function update(elapsedMillis: number) {
 
     for (const [idx, obj] of Object.entries(gameObjects)) {
         const collisions = getCollisions(parseInt(idx));
-        const deleteObj = obj.update(elapsedMillis, keys, collisions);
+
+        const deleteObj = obj.update(elapsedMillis, keys, collisions, connections);
 
         if (deleteObj) {
             objToDelete.push(parseInt(idx));
@@ -100,8 +101,6 @@ function getCollisionPoint(obj1: GameObject, obj2: GameObject): "east" | "west" 
     const box2 = obj2.getCollisionBox();
 
     // Checks if any combination of x and y of obj1 is within/in between obj2's area. 
-
-
 
     if (!(box1.x1 > box2.x2 || box1.x2 < box2.x1 || box1.y1 > box2.y2 || box1.y2 < box2.y1)) {
         if (isInInterval(box1.y2, { start: box2.y1, end: box2.y2 })) {

@@ -1,11 +1,11 @@
 import AssetHandler from "./AssetHandler";
-import { GameObject, Collision, CollisionBox, GameObjectKind, Point, KeyState } from "./types";
+import { GameObject, Collision, CollisionBox, GameObjectKind, Point, KeyState, ConnectedObjects } from "./types";
 import { Egg } from "./Egg";
 
 const MARIO_STARTING_POS: Point = { y: 135 - 48, x: -6 };
 
 interface MarioState {
-    handleInput: (mario: Mario, elapsedMillis: number, keys: KeyState) => void;
+    handleInput: (mario: Mario, elapsedMillis: number, keys: KeyState, connections: ConnectedObjects) => void;
     update: (mario: Mario, elapsedMillis: number) => void;
 }
 
@@ -43,11 +43,7 @@ class MarioIdleState implements MarioState {
     private getAsset(mario: Mario) {
         const assetHandler = AssetHandler.getInstance();
 
-        if (mario.itemState instanceof MarioHoldingItemState) {
-            return mario.direction === "right" ? assetHandler.get("walk-right-holding-item-0") : assetHandler.get("walk-left-holding-item-0")
-        }
-
-        return mario.direction === "right" ? assetHandler.get("walk-right-0") : assetHandler.get("walk-left-0");
+        return assetHandler.get(`walk-${mario.direction}${mario.itemState instanceof MarioHoldingItemState ? "-holding-item" : ""}${mario.damageState instanceof MarioDamageState ? "-damage" : ""}1`);
     }
 }
 
@@ -86,14 +82,8 @@ class MarioDamageState implements MarioState {
             mario.damageState = null;
         }
 
-        mario.asset = this.getAsset(mario);
     }
 
-    private getAsset(mario: Mario) {
-        const assetHandler = AssetHandler.getInstance();
-
-        return this.frame % 4 === 0 ? assetHandler.get("walk-right-0-damage") : assetHandler.get("walk-right-0");
-    }
 }
 
 /** 
@@ -146,34 +136,7 @@ class MarioWalkingState implements MarioState {
 
         const assetHandler = AssetHandler.getInstance();
 
-        if (mario.itemState instanceof MarioHoldingItemState) {
-            switch (this.walkFrame) {
-                case 0:
-                    return mario.direction === "right" ? assetHandler.get("walk-right-holding-item-0") : assetHandler.get("walk-left-holding-item-0");
-                case 1:
-                    return mario.direction === "right" ? assetHandler.get("walk-right-holding-item-1") : assetHandler.get("walk-left-holding-item-1");
-                case 2:
-                    return mario.direction === "right" ? assetHandler.get("walk-right-holding-item-0") : assetHandler.get("walk-left-holding-item-0");
-                case 3:
-                    return mario.direction === "right" ? assetHandler.get("walk-right-holding-item-2") : assetHandler.get("walk-left-holding-item-2");
-                default:
-                    return mario.direction === "right" ? assetHandler.get("walk-right-holding-item-0") : assetHandler.get("walk-left-holding-item-0");
-            }
-        } else {
-            switch (this.walkFrame) {
-                case 0:
-                    return mario.direction === "right" ? assetHandler.get("walk-right-0") : assetHandler.get("walk-left-0");
-                case 1:
-                    return mario.direction === "right" ? assetHandler.get("walk-right-1") : assetHandler.get("walk-left-1");
-                case 2:
-                    return mario.direction === "right" ? assetHandler.get("walk-right-0") : assetHandler.get("walk-left-0");
-                case 3:
-                    return mario.direction === "right" ? assetHandler.get("walk-right-2") : assetHandler.get("walk-left-2");
-                default:
-                    return mario.direction === "right" ? assetHandler.get("walk-right-0") : assetHandler.get("walk-left-0");
-            }
-        }
-
+        return assetHandler.get(`walk-${mario.direction}${mario.itemState instanceof MarioHoldingItemState ? "-holding-item" : ""}${mario.damageState instanceof MarioDamageState ? "-damage" : ""}${this.walkFrame + 1}`);
     }
 
 
@@ -249,11 +212,8 @@ class MarioJumpingState implements MarioState {
 
         const assetHandler = AssetHandler.getInstance();
 
-        if (mario.itemState instanceof MarioHoldingItemState) {
-            return mario.direction === "right" ? assetHandler.get("walk-right-holding-item-1") : assetHandler.get("walk-left-holding-item-1")
-        } else {
-            return mario.direction === "right" ? assetHandler.get("walk-right-1") : assetHandler.get("walk-left-1");
-        }
+        return assetHandler.get(`walk-${mario.direction}${mario.itemState instanceof MarioHoldingItemState ? "-holding-item" : ""}${mario.damageState instanceof MarioDamageState ? "-damage" : ""}2`);
+
     }
 }
 
@@ -311,12 +271,8 @@ class MarioFallingState implements MarioState {
 
     private getAsset(mario: Mario) {
         const assetHandler = AssetHandler.getInstance();
+        return assetHandler.get(`walk-${mario.direction}${mario.itemState instanceof MarioHoldingItemState ? "-holding-item" : ""}${mario.damageState instanceof MarioDamageState ? "-damage" : ""}2`);
 
-        if (mario.itemState instanceof MarioHoldingItemState) {
-            return mario.direction === "right" ? assetHandler.get("walk-right-holding-item-0") : assetHandler.get("walk-left-holding-item-0")
-        }
-
-        return mario.direction === "right" ? assetHandler.get("walk-right-1") : assetHandler.get("walk-left-1");
     }
 }
 
@@ -337,22 +293,22 @@ class MarioPickingState implements MarioState {
     }
 
     update(mario: Mario, elapsedMillis: number) {
-        mario.asset = this.getAsset();
+        mario.asset = this.getAsset(mario);
 
         // Change to Holding item state after 500 ms
         this.elapsedMillisDiff += (elapsedMillis - this.prevMillis);
         this.prevMillis = elapsedMillis;
 
-        if (this.elapsedMillisDiff >= 500) {
+        if (this.elapsedMillisDiff >= 300) {
             mario.itemState = new MarioHoldingItemState(elapsedMillis, mario.collisionHandler.pickUpEgg(mario)!); // Should not enter this state if egg is null
 
 
         }
     }
 
-    private getAsset() {
+    private getAsset(mario: Mario) {
         const assetHandler = AssetHandler.getInstance();
-        return assetHandler.get("lift-0");
+        return mario.damageState !== null ? assetHandler.get("lift-damage") : assetHandler.get("lift");
     }
 }
 
@@ -372,10 +328,13 @@ class MarioHoldingItemState implements MarioState {
 
     }
 
-    handleInput(mario: Mario, elapsedMillis: number, keys: KeyState) {
+    handleInput(mario: Mario, elapsedMillis: number, keys: KeyState, connections: ConnectedObjects) {
         if (keys["ö"]) {
             // Throw 
             mario.itemState = new MarioThrowingItemState(elapsedMillis);
+
+
+
             this.egg.throw(mario.direction);
         }
     }
@@ -414,12 +373,9 @@ class MarioThrowingItemState implements MarioState {
     private prevMillis: number;
     private elapsedMillisDiff: number;
 
-
-
     constructor(elapsedMillis: number,) {
         this.prevMillis = elapsedMillis;
         this.elapsedMillisDiff = 0;
-
     }
 
     handleInput(mario: Mario, elapsedMillis: number, keys: KeyState) {
@@ -435,9 +391,7 @@ class MarioThrowingItemState implements MarioState {
         this.prevMillis = elapsedMillis;
 
         // Will keep mario in a throwing state until 500 ms has elapsed
-        if (this.elapsedMillisDiff >= 500) {
-
-
+        if (this.elapsedMillisDiff >= 250) {
             mario.itemState = null;
         }
     }
@@ -481,7 +435,7 @@ class MarioCollisionsHandler {
     /**
      * Checks for collision with egg. If collision just begun we sett the egg to the instance of that egg. 
      */
-    update(mario: Mario, collisions: Collision[], elapsedMillis: number) {
+    update(elapsedMillis: number, mario: Mario, collisions: Collision[], connections: ConnectedObjects) {
 
         let foundSouthCollisionWithEgg = false;
 
@@ -492,6 +446,8 @@ class MarioCollisionsHandler {
             // Standing on egg begins
             if (eggCollision !== undefined && eggCollision.collisionPoint === "south" && this.egg === null) {
 
+
+
                 foundSouthCollisionWithEgg = true;
 
                 if (mario.movingState instanceof MarioJumpingState) {
@@ -499,6 +455,7 @@ class MarioCollisionsHandler {
                 }
 
                 mario.pos.y = eggCollision.obj.pos.y - 48;
+
                 this.egg = eggCollision.obj as Egg;
 
                 // Is standing on egg already 
@@ -511,29 +468,22 @@ class MarioCollisionsHandler {
                 mario.pos.x += this.egg.vel.x;
             }
 
-            // Eggcollision but not standing on it
-            else if (eggCollision !== undefined && mario.damageState === null) {
+            // Eggcollision but not standing on it and not holding the egg e.g. not connected to it
+            else if (eggCollision !== undefined && mario.damageState === null && !(mario.itemState instanceof MarioHoldingItemState) && !(mario.itemState instanceof MarioThrowingItemState)) {
 
                 mario.damageState = new MarioDamageState(elapsedMillis);
-
-
-                // Is no longer on the egg.
-            } else if (eggCollision === undefined && this.egg !== null) {
-                this.egg = null;
-
-                if (mario.movingState instanceof MarioWalkingState) {
-                    // Fall down
-                    mario.pos.y = MARIO_STARTING_POS.y;
-                    mario.movingState = new MarioFallingState();
-                } else if (mario.movingState instanceof MarioJumpingState) {
-
-                }
+                mario.kills += 1;
+                console.log("MARIO KILLS", mario.kills)
 
             }
         }
 
         if (this.egg !== null && !foundSouthCollisionWithEgg) {
+
+            // Remove as connected to mario.
+
             this.egg = null;
+
 
             if (mario.movingState instanceof MarioWalkingState) {
                 mario.movingState = new MarioFallingState();
@@ -546,12 +496,13 @@ class MarioCollisionsHandler {
 
 export class Mario implements GameObject {
 
+    id: string;
     kind: GameObjectKind = GameObjectKind.MARIO;
     direction: "right" | "left";
     pos: Point;
     vel: Point;
     asset: HTMLImageElement | null;
-    private lives: number;
+    kills: number;
 
     movingState: MarioState;
     itemState: MarioState | null;
@@ -559,7 +510,8 @@ export class Mario implements GameObject {
     collisionHandler: MarioCollisionsHandler;
 
     constructor() {
-        this.lives = 5;
+        this.id = "mario";
+        this.kills = 0;
         this.pos = { ...MARIO_STARTING_POS };
         this.vel = { x: 0, y: 0 };
         this.asset = null;
@@ -573,21 +525,51 @@ export class Mario implements GameObject {
     init() {
         const assetHandler = AssetHandler.getInstance();
 
-        assetHandler.register("walk-right-0", "./assets/mario-walk-right-0.png");
-        assetHandler.register("walk-right-0-damage", "./assets/mario-walk-right-0-damage.png");
-        assetHandler.register("walk-right-1", "./assets/mario-walk-right-1.png");
-        assetHandler.register("walk-right-2", "./assets/mario-walk-right-2.png");
-        assetHandler.register("walk-left-0", "./assets/mario-walk-left-0.png");
-        assetHandler.register("walk-left-1", "./assets/mario-walk-left-1.png");
-        assetHandler.register("walk-left-2", "./assets/mario-walk-left-2.png");
-        assetHandler.register("lift-0", "./assets/mario-lift-0.png");
+        assetHandler.register("walk-right1", "./assets/mario-walk-right1.png");
+        assetHandler.register("walk-right2", "./assets/mario-walk-right2.png");
+        assetHandler.register("walk-right3", "./assets/mario-walk-right3.png");
+        assetHandler.register("walk-right4", "./assets/mario-walk-right4.png");
+        assetHandler.register("walk-right-damage1", "./assets/mario-walk-right-damage1.png");
+        assetHandler.register("walk-right-damage2", "./assets/mario-walk-right-damage2.png");
+        assetHandler.register("walk-right-damage3", "./assets/mario-walk-right-damage3.png");
+        assetHandler.register("walk-right-damage4", "./assets/mario-walk-right-damage4.png");
 
-        assetHandler.register("walk-right-holding-item-0", "./assets/mario-walk-right-holding-item-0.png");
-        assetHandler.register("walk-right-holding-item-1", "./assets/mario-walk-right-holding-item-1.png");
-        assetHandler.register("walk-right-holding-item-2", "./assets/mario-walk-right-holding-item-2.png");
-        assetHandler.register("walk-left-holding-item-0", "./assets/mario-walk-left-holding-item-0.png");
-        assetHandler.register("walk-left-holding-item-1", "./assets/mario-walk-left-holding-item-1.png");
-        assetHandler.register("walk-left-holding-item-2", "./assets/mario-walk-left-holding-item-2.png");
+        assetHandler.register("walk-left1", "./assets/mario-walk-left1.png");
+        assetHandler.register("walk-left2", "./assets/mario-walk-left2.png");
+        assetHandler.register("walk-left3", "./assets/mario-walk-left3.png");
+        assetHandler.register("walk-left4", "./assets/mario-walk-left4.png");
+
+        assetHandler.register("walk-left-damage1", "./assets/mario-walk-left-damage1.png");
+        assetHandler.register("walk-left-damage2", "./assets/mario-walk-left-damage2.png");
+        assetHandler.register("walk-left-damage3", "./assets/mario-walk-left-damage3.png");
+        assetHandler.register("walk-left-damage4", "./assets/mario-walk-left-damage4.png");
+
+        assetHandler.register("lift", "./assets/mario-lift.png");
+
+        assetHandler.register("lift-damage", "./assets/mario-lift-damage.png");
+
+        assetHandler.register("walk-right-holding-item1", "./assets/mario-walk-right-holding-item1.png");
+        assetHandler.register("walk-right-holding-item2", "./assets/mario-walk-right-holding-item2.png");
+        assetHandler.register("walk-right-holding-item3", "./assets/mario-walk-right-holding-item3.png");
+        assetHandler.register("walk-right-holding-item4", "./assets/mario-walk-right-holding-item4.png");
+
+
+        assetHandler.register("walk-right-holding-item-damage1", "./assets/mario-walk-right-holding-item-damage1.png");
+        assetHandler.register("walk-right-holding-item-damage2", "./assets/mario-walk-right-holding-item-damage2.png");
+        assetHandler.register("walk-right-holding-item-damage3", "./assets/mario-walk-right-holding-item-damage3.png");
+        assetHandler.register("walk-right-holding-item-damage4", "./assets/mario-walk-right-holding-item-damage4.png");
+
+        assetHandler.register("walk-left-holding-item1", "./assets/mario-walk-left-holding-item1.png");
+        assetHandler.register("walk-left-holding-item2", "./assets/mario-walk-left-holding-item2.png");
+        assetHandler.register("walk-left-holding-item3", "./assets/mario-walk-left-holding-item3.png");
+        assetHandler.register("walk-left-holding-item4", "./assets/mario-walk-left-holding-item4.png");
+
+
+        assetHandler.register("walk-left-holding-item-damage1", "./assets/mario-walk-left-holding-item-damage1.png");
+        assetHandler.register("walk-left-holding-item-damage2", "./assets/mario-walk-left-holding-item-damage2.png");
+        assetHandler.register("walk-left-holding-item-damage3", "./assets/mario-walk-left-holding-item-damage3.png");
+        assetHandler.register("walk-left-holding-item-damage4", "./assets/mario-walk-left-holding-item-damage4.png");
+
 
         assetHandler.register("throw-left", "./assets/mario-throw-left.png");
         assetHandler.register("throw-right", "./assets/mario-throw-right.png");
@@ -598,21 +580,21 @@ export class Mario implements GameObject {
         return { y1: this.pos.y + 8, x1: this.pos.x, x2: this.pos.x + 32, y2: this.pos.y + 48 }
     }
 
-    update(elapsedMillis: number, keys: KeyState, collisions: Collision[]) {
+    update(elapsedMillis: number, keys: KeyState, collisions: Collision[], connections: ConnectedObjects) {
 
-        this.collisionHandler.update(this, collisions, elapsedMillis);
+        this.collisionHandler.update(elapsedMillis, this, collisions, connections);
 
-        this.movingState.handleInput(this, elapsedMillis, keys);
+        this.movingState.handleInput(this, elapsedMillis, keys, connections);
 
         this.movingState.update(this, elapsedMillis);
 
         if (this.itemState !== null) {
-            this.itemState.handleInput(this, elapsedMillis, keys);
+            this.itemState.handleInput(this, elapsedMillis, keys, connections);
             this.itemState.update(this, elapsedMillis);
         }
 
         if (this.damageState !== null) {
-            this.damageState.handleInput(this, elapsedMillis, keys);
+            this.damageState.handleInput(this, elapsedMillis, keys, connections);
             this.damageState.update(this, elapsedMillis)
         }
     }
