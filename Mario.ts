@@ -1,11 +1,14 @@
 import AssetHandler from "./AssetHandler";
-import { GameObject, Collision, CollisionBox, GameObjectKind, Point, KeyState, ConnectedObjects } from "./types";
+import { GameObject, Collision, CollisionBox, GameObjectKind, Point, KeyState } from "./types";
 import { Egg } from "./Egg";
+import { Dragon } from "./Dragon";
+
+
 
 const MARIO_STARTING_POS: Point = { y: 135 - 48, x: -6 };
 
 interface MarioState {
-    handleInput: (mario: Mario, elapsedMillis: number, keys: KeyState, connections: ConnectedObjects) => void;
+    handleInput: (mario: Mario, elapsedMillis: number, keys: KeyState) => void;
     update: (mario: Mario, elapsedMillis: number) => void;
 }
 
@@ -19,6 +22,11 @@ interface MarioState {
  * - Press space -> MarioJumpingState
  */
 class MarioIdleState implements MarioState {
+    flipFlop: boolean;
+
+    constructor() {
+        this.flipFlop = true;
+    }
 
     handleInput(mario: Mario, elapsedMillis: number, keys: KeyState) {
         if (keys["a"] && !keys["d"]) {
@@ -28,8 +36,15 @@ class MarioIdleState implements MarioState {
             mario.direction = "right";
             mario.movingState = new MarioWalkingState(elapsedMillis);
         } else if (keys[" "]) {
+
+
+            if (mario.standingOnEggState) {
+
+                mario.standingOnEggState = null;
+            };
             mario.movingState = new MarioJumpingState();
-        } else if (keys["s"] && mario.collisionHandler.isStandingOnEgg() && !(mario.itemState instanceof MarioHoldingItemState)) {
+        } else if (keys["s"] && mario.standingOnEggState !== null && !(mario.itemState instanceof MarioHoldingItemState)) {
+
             mario.movingState = new MarioPickingState(elapsedMillis);
         }
     }
@@ -43,7 +58,13 @@ class MarioIdleState implements MarioState {
     private getAsset(mario: Mario) {
         const assetHandler = AssetHandler.getInstance();
 
-        return assetHandler.get(`walk-${mario.direction}${mario.itemState instanceof MarioHoldingItemState ? "-holding-item" : ""}${mario.damageState instanceof MarioDamageState ? "-damage" : ""}1`);
+        if (mario.damageState instanceof MarioDamageState) {
+            this.flipFlop = !this.flipFlop;
+
+            return assetHandler.get(`walk-${mario.direction}${mario.itemState instanceof MarioHoldingItemState ? "-holding-item" : ""}${this.flipFlop ? "-damage" : ""}1`);
+        } else {
+            return assetHandler.get(`walk-${mario.direction}${mario.itemState instanceof MarioHoldingItemState ? "-holding-item" : ""}1`);
+        }
     }
 }
 
@@ -57,13 +78,11 @@ class MarioDamageState implements MarioState {
 
     private prevMillis: number;
     private elapsedMillisDiff: number;
-    private frame: number;
 
 
     constructor(elapsedMillis: number,) {
         this.prevMillis = elapsedMillis;
         this.elapsedMillisDiff = 0;
-        this.frame = 0;
 
     }
 
@@ -72,13 +91,10 @@ class MarioDamageState implements MarioState {
     }
 
     update(mario: Mario, elapsedMillis: number) {
-        // Update millis diff
         this.elapsedMillisDiff += (elapsedMillis - this.prevMillis);
         this.prevMillis = elapsedMillis;
-        this.frame++;
 
-        // Will keep mario in a throwing state until 500 ms has elapsed
-        if (this.elapsedMillisDiff >= 1000) {
+        if (this.elapsedMillisDiff >= 500) {
             mario.damageState = null;
         }
 
@@ -99,11 +115,14 @@ class MarioWalkingState implements MarioState {
     private prevMillis: number;
     private elapsedMillisDiff: number;
     private walkFrame: 0 | 1 | 2 | 3;
+    private flipFlop: boolean;
+
 
     constructor(elapsedMillis: number) {
         this.prevMillis = elapsedMillis;
         this.walkFrame = 0;
         this.elapsedMillisDiff = 0;
+        this.flipFlop = true;
     }
 
     handleInput(mario: Mario, elapsedMillis: number, keys: KeyState) {
@@ -113,7 +132,7 @@ class MarioWalkingState implements MarioState {
             mario.movingState = new MarioIdleState();
         } else if (keys[" "]) {
             mario.movingState = new MarioJumpingState();
-        } else if (keys["s"] && mario.collisionHandler.isStandingOnEgg() && !(mario.itemState instanceof MarioHoldingItemState)) {
+        } else if (keys["s"] && mario.standingOnEggState !== null && !(mario.itemState instanceof MarioHoldingItemState)) {
             mario.movingState = new MarioPickingState(elapsedMillis);
         }
     }
@@ -121,9 +140,13 @@ class MarioWalkingState implements MarioState {
     update(mario: Mario, elapsedMillis: number) {
         if (mario.direction === "left") {
             mario.vel.x = -1;
-        } else {
+        } else if (mario.direction === "right") {
             mario.vel.x = 1;
+        } else {
+            mario.vel.x = 0;
         }
+
+        // Update according to player controls
 
         mario.pos.x += mario.vel.x;
         mario.pos.y += mario.vel.y;
@@ -136,7 +159,12 @@ class MarioWalkingState implements MarioState {
 
         const assetHandler = AssetHandler.getInstance();
 
-        return assetHandler.get(`walk-${mario.direction}${mario.itemState instanceof MarioHoldingItemState ? "-holding-item" : ""}${mario.damageState instanceof MarioDamageState ? "-damage" : ""}${this.walkFrame + 1}`);
+        if (mario.damageState instanceof MarioDamageState) {
+            this.flipFlop = !this.flipFlop;
+            return assetHandler.get(`walk-${mario.direction}${mario.itemState instanceof MarioHoldingItemState ? "-holding-item" : ""}${this.flipFlop ? "-damage" : ""}${this.walkFrame + 1}`);
+        }
+
+        return assetHandler.get(`walk-${mario.direction}${mario.itemState instanceof MarioHoldingItemState ? "-holding-item" : ""}${this.walkFrame + 1}`);
     }
 
 
@@ -166,9 +194,12 @@ class MarioWalkingState implements MarioState {
 class MarioJumpingState implements MarioState {
 
     private frame: number;
+    private flipFlop: boolean;
+
 
     constructor() {
         this.frame = 0;
+        this.flipFlop = true;
     }
 
     handleInput(mario: Mario, _: number, keys: KeyState) {
@@ -181,7 +212,17 @@ class MarioJumpingState implements MarioState {
     }
 
     update(mario: Mario, _: number) {
+
+        // If in the air and landed on egg it should change state to idle state
+        // But if standing on egg and starts jumping should not?
+        if (mario.standingOnEggState !== null) {
+            mario.pos.y = mario.standingOnEggState.getEgg().pos.y - 47; // Initialize mario y to egg
+            mario.movingState = new MarioIdleState();
+            return;
+        }
+
         mario.asset = this.getAsset(mario);
+
 
         // Determine velocity y
 
@@ -212,7 +253,12 @@ class MarioJumpingState implements MarioState {
 
         const assetHandler = AssetHandler.getInstance();
 
-        return assetHandler.get(`walk-${mario.direction}${mario.itemState instanceof MarioHoldingItemState ? "-holding-item" : ""}${mario.damageState instanceof MarioDamageState ? "-damage" : ""}2`);
+        if (mario.damageState instanceof MarioDamageState) {
+            this.flipFlop = !this.flipFlop;
+            return assetHandler.get(`walk-${mario.direction}${mario.itemState instanceof MarioHoldingItemState ? "-holding-item" : ""}${this.flipFlop ? "-damage" : ""}2`);
+        }
+
+        return assetHandler.get(`walk-${mario.direction}${mario.itemState instanceof MarioHoldingItemState ? "-holding-item" : ""}2`);
 
     }
 }
@@ -293,15 +339,21 @@ class MarioPickingState implements MarioState {
     }
 
     update(mario: Mario, elapsedMillis: number) {
+
         mario.asset = this.getAsset(mario);
+
 
         // Change to Holding item state after 500 ms
         this.elapsedMillisDiff += (elapsedMillis - this.prevMillis);
         this.prevMillis = elapsedMillis;
 
-        if (this.elapsedMillisDiff >= 300) {
-            mario.itemState = new MarioHoldingItemState(elapsedMillis, mario.collisionHandler.pickUpEgg(mario)!); // Should not enter this state if egg is null
+        if (this.elapsedMillisDiff >= 300 && mario.standingOnEggState) {
 
+            const egg = mario.standingOnEggState.getEgg();
+
+            mario.standingOnEggState = null;
+            mario.movingState = new MarioFallingState();
+            mario.itemState = new MarioHoldingItemState(elapsedMillis, egg); // Should not enter this state if egg is null
 
         }
     }
@@ -321,20 +373,18 @@ class MarioHoldingItemState implements MarioState {
 
     constructor(elapsedMillis: number, egg: Egg) {
         this.egg = egg;
-        egg.pickUp();
+
+        egg.pickUp(); // will prevent egg from updating its position, it now belongs to mario. 
         this.yDiff = 1;
         this.elapsedMillisDiff = 0;
         this.prevMillis = elapsedMillis;
 
     }
 
-    handleInput(mario: Mario, elapsedMillis: number, keys: KeyState, connections: ConnectedObjects) {
+    handleInput(mario: Mario, elapsedMillis: number, keys: KeyState) {
         if (keys["ö"]) {
             // Throw 
-            mario.itemState = new MarioThrowingItemState(elapsedMillis);
-
-
-
+            mario.itemState = new MarioThrowingItemState(elapsedMillis, this.egg);
             this.egg.throw(mario.direction);
         }
     }
@@ -367,15 +417,50 @@ class MarioHoldingItemState implements MarioState {
         }
 
     }
+
+    getEgg() {
+        return this.egg;
+    }
+}
+
+/**
+ * Vill basically just keep information about the egg that mario could be standing on
+ * 
+ */
+class MarioStandingOnEggState implements MarioState {
+    private egg: Egg;
+
+    constructor(egg: Egg) {
+        this.egg = egg;
+    }
+
+    getEgg() {
+        return this.egg;
+    }
+
+    handleInput(mario: Mario, elapsedMillis: number, keys: KeyState) {
+
+    }
+
+    update(mario: Mario, elapsedMillis: number) {
+
+        // Update according to moving egg
+        mario.pos.y += this.egg.vel.y;
+        mario.pos.x += this.egg.vel.x;
+
+
+    }
 }
 
 class MarioThrowingItemState implements MarioState {
     private prevMillis: number;
     private elapsedMillisDiff: number;
+    private egg: Egg;
 
-    constructor(elapsedMillis: number,) {
+    constructor(elapsedMillis: number, egg: Egg) {
         this.prevMillis = elapsedMillis;
         this.elapsedMillisDiff = 0;
+        this.egg = egg;
     }
 
     handleInput(mario: Mario, elapsedMillis: number, keys: KeyState) {
@@ -396,6 +481,10 @@ class MarioThrowingItemState implements MarioState {
         }
     }
 
+    getEgg() {
+        return this.egg;
+    }
+
     private getAsset(mario: Mario) {
         const assetHandler = AssetHandler.getInstance();
         return mario.direction === "left" ? assetHandler.get("throw-left") : assetHandler.get("throw-right");
@@ -404,93 +493,53 @@ class MarioThrowingItemState implements MarioState {
 
 
 /**
- * This class checks for collisions with an egg that the dragon throws and if so updateds marios x and y according to the egg's x and y. 
+ * This class checks for collisions and updates marios state. 
  */
 class MarioCollisionsHandler {
 
-    private egg: Egg | null;
-
-    constructor() {
-        this.egg = null;
-    }
-
-    isStandingOnEgg() {
-        return this.egg !== null;
-    }
-
-    getEgg() {
-        return this.egg;
-    }
-
-    pickUpEgg(mario: Mario) {
-        const egg = this.egg;
-
-
-        mario.movingState = new MarioFallingState();
-        this.egg = null;
-        return egg;
-    }
-
 
     /**
-     * Checks for collision with egg. If collision just begun we sett the egg to the instance of that egg. 
+     * Checks for collision with egg and dragon. 
      */
-    update(elapsedMillis: number, mario: Mario, collisions: Collision[], connections: ConnectedObjects) {
+    update(elapsedMillis: number, mario: Mario, collisions: Collision[]) {
 
-        let foundSouthCollisionWithEgg = false;
+        let isStandingOnEgg = false;
 
         for (const collision of collisions) {
 
-            const eggCollision = collision.obj.kind === GameObjectKind.EGG ? collision : undefined;
+            // Standing on egg
+            if (collision.obj instanceof Egg && collision.collisionPoint === "south") {
 
-            // Standing on egg begins
-            if (eggCollision !== undefined && eggCollision.collisionPoint === "south" && this.egg === null) {
-
-
-
-                foundSouthCollisionWithEgg = true;
-
-                if (mario.movingState instanceof MarioJumpingState) {
-                    mario.movingState = new MarioIdleState();
+                if (mario.standingOnEggState === null) {
+                    mario.standingOnEggState = new MarioStandingOnEggState(collision.obj);
                 }
 
-                mario.pos.y = eggCollision.obj.pos.y - 48;
-
-                this.egg = eggCollision.obj as Egg;
-
-                // Is standing on egg already 
-            } else if (eggCollision !== undefined && eggCollision.collisionPoint === "south" && this.egg !== null) {
-
-                foundSouthCollisionWithEgg = true;
-
-                // Update marios position according to egg
-                mario.pos.y += this.egg.vel.y;
-                mario.pos.x += this.egg.vel.x;
+                isStandingOnEgg = true;
             }
 
-            // Eggcollision but not standing on it and not holding the egg e.g. not connected to it
-            else if (eggCollision !== undefined && mario.damageState === null && !(mario.itemState instanceof MarioHoldingItemState) && !(mario.itemState instanceof MarioThrowingItemState)) {
+            // If not throwing or holding the egg that mario is colliding with, he will take damage
+            else if (!(collision.obj instanceof Egg && (mario.itemState instanceof MarioHoldingItemState && (mario.itemState as MarioHoldingItemState).getEgg() === collision.obj) || (mario.itemState instanceof MarioThrowingItemState &&
+                (mario.itemState as MarioThrowingItemState).getEgg() == collision.obj
+            ))) {
+
 
                 mario.damageState = new MarioDamageState(elapsedMillis);
                 mario.kills += 1;
-                console.log("MARIO KILLS", mario.kills)
+
+
 
             }
         }
 
-        if (this.egg !== null && !foundSouthCollisionWithEgg) {
+        if (mario.standingOnEggState !== null && !isStandingOnEgg) {
 
-            // Remove as connected to mario.
-
-            this.egg = null;
-
-
+            mario.standingOnEggState = null;
+            // Let mario fall down from egg if he walked away from it
             if (mario.movingState instanceof MarioWalkingState) {
                 mario.movingState = new MarioFallingState();
-            } else if (mario.movingState instanceof MarioJumpingState) {
-
             }
         }
+
     }
 }
 
@@ -507,6 +556,7 @@ export class Mario implements GameObject {
     movingState: MarioState;
     itemState: MarioState | null;
     damageState: MarioState | null;
+    standingOnEggState: MarioStandingOnEggState | null;
     collisionHandler: MarioCollisionsHandler;
 
     constructor() {
@@ -516,9 +566,10 @@ export class Mario implements GameObject {
         this.vel = { x: 0, y: 0 };
         this.asset = null;
         this.direction = "right";
-        this.movingState = new MarioIdleState();
-        this.itemState = null;
-        this.damageState = null;
+        this.movingState = new MarioIdleState(); // MarioWalkingState, MarioIdleState, MarioPickingItemState, MarioJumpState, MarioFallingState ---> Can only do one thing at a time
+        this.itemState = null; // ---> MarioHoldingItemState, MarioThrowingItemState ---> can do either of these at a time. Mario can at the same time walk, stand still, jump or fall. 
+        this.damageState = null; // --> Can be taking damage or not, will animate a flickering whiteish image 
+        this.standingOnEggState = null; // --> Can be standing on egg or not, will update marios x and y pos according to the eggs vel
         this.collisionHandler = new MarioCollisionsHandler();
     }
 
@@ -577,32 +628,43 @@ export class Mario implements GameObject {
     }
 
     getCollisionBox(): CollisionBox {
-        return { y1: this.pos.y + 8, x1: this.pos.x, x2: this.pos.x + 32, y2: this.pos.y + 48 }
+        return { y: this.pos.y + 16, x: this.pos.x + 8, w: 20, h: 32 }
     }
 
-    update(elapsedMillis: number, keys: KeyState, collisions: Collision[], connections: ConnectedObjects) {
+    update(elapsedMillis: number, keys: KeyState, collisions: Collision[]) {
 
-        this.collisionHandler.update(elapsedMillis, this, collisions, connections);
 
-        this.movingState.handleInput(this, elapsedMillis, keys, connections);
+        this.collisionHandler.update(elapsedMillis, this, collisions);
+
+        this.movingState.handleInput(this, elapsedMillis, keys);
 
         this.movingState.update(this, elapsedMillis);
 
+
+        if (this.standingOnEggState !== null) {
+            this.standingOnEggState.handleInput(this, elapsedMillis, keys);
+            this.standingOnEggState.update(this, elapsedMillis)
+        }
+
         if (this.itemState !== null) {
-            this.itemState.handleInput(this, elapsedMillis, keys, connections);
+            this.itemState.handleInput(this, elapsedMillis, keys);
             this.itemState.update(this, elapsedMillis);
         }
 
+
         if (this.damageState !== null) {
-            this.damageState.handleInput(this, elapsedMillis, keys, connections);
+            this.damageState.handleInput(this, elapsedMillis, keys);
             this.damageState.update(this, elapsedMillis)
         }
+
+
     }
 
     draw(ctx: CanvasRenderingContext2D) {
 
         if (this.asset === null) throw "Asset is null";
         ctx.drawImage(this.asset, this.pos.x, this.pos.y);
+
     }
 
 }

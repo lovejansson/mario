@@ -1,10 +1,10 @@
-import { GameObject, KeyState, ConnectedObjects } from "./types";
+import { GameObject, KeyState } from "./types";
+
+export let isDebugMode = true;
 
 export const keys: KeyState = {};
 
 export let gameObjects: GameObject[] = [];
-
-export let connections: ConnectedObjects;
 
 export function reassignGameObjects(updated: GameObject[]) {
     gameObjects = updated

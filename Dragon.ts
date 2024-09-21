@@ -1,7 +1,7 @@
 import AssetHandler from "./AssetHandler";
-import { Egg } from "./Egg";
+import { Egg, EggState } from "./Egg";
 import { gameObjects } from "./globalState";
-import { GameObject, Collision, CollisionBox, GameObjectKind, Point, KeyState, ConnectedObjects } from "./types";
+import { GameObject, Collision, CollisionBox, GameObjectKind, Point, KeyState } from "./types";
 
 
 const START_POS: Point = { y: 135 - 47, x: 250 };
@@ -19,10 +19,12 @@ interface DragonState {
 class DragonIdleState implements DragonState {
     private prevMillis: number;
     private elapsedMillis: number;
+    private flipFlop: boolean;
 
     constructor(elapsedMillis: number) {
         this.prevMillis = elapsedMillis;
         this.elapsedMillis = 0;
+        this.flipFlop = false;
     }
 
     update(dragon: Dragon, elapsedMillis: number) {
@@ -44,7 +46,12 @@ class DragonIdleState implements DragonState {
 
         const assetHandler = AssetHandler.getInstance();
 
-        dragon.asset = assetHandler.get("dragon-0")
+        dragon.asset = assetHandler.get(`dragon-0${dragon.damageState ? this.flipFlop ? "-damage0" : "-damage1" : ""}`)
+
+
+        if (dragon.damageState) {
+            this.flipFlop = !this.flipFlop;
+        }
     };
 }
 
@@ -58,10 +65,12 @@ class DragonWalkingState implements DragonState {
 
     private prevMillis: number;
     private elapsedMillis: number;
+    private flipFlop: boolean;
 
     constructor(elapsedMillis: number) {
         this.prevMillis = elapsedMillis;
         this.elapsedMillis = 0;
+        this.flipFlop = false;
     }
 
     update(dragon: Dragon, elapsedMillis: number) {
@@ -92,7 +101,11 @@ class DragonWalkingState implements DragonState {
         }
 
         const assetHandler = AssetHandler.getInstance();
-        dragon.asset = assetHandler.get("dragon-0")
+        dragon.asset = assetHandler.get(`dragon-0${dragon.damageState ? this.flipFlop ? "-damage0" : "-damage1" : ""}`)
+
+        if (dragon.damageState) {
+            this.flipFlop = !this.flipFlop;
+        }
     }
 
 };
@@ -107,9 +120,11 @@ class DragonWalkingState implements DragonState {
 class DragonJumpingState implements DragonState {
 
     private frame: number;
+    private flipFlop: boolean;
 
     constructor() {
         this.frame = 0;
+        this.flipFlop = false;
 
     }
     update(dragon: Dragon, elapsedMillis: number) {
@@ -137,10 +152,14 @@ class DragonJumpingState implements DragonState {
             this.frame++;
         }
 
-
         const assetHandler = AssetHandler.getInstance();
+        dragon.asset = assetHandler.get(`dragon-0${dragon.damageState ? this.flipFlop ? "-damage0" : "-damage1" : ""}`)
 
-        dragon.asset = assetHandler.get("dragon-0")
+
+        if (dragon.damageState) {
+            this.flipFlop = !this.flipFlop;
+        }
+
     };
 }
 
@@ -158,28 +177,35 @@ class DragonShootingState implements DragonState {
 
     private hasShotEgg: boolean;
 
+    private flipFlop: boolean;
+
     constructor(elapsedMillis: number) {
         this.prevMillis = elapsedMillis;
         this.elapsedMillis = 0;
         this.hasShotEgg = false;
+        this.flipFlop = false;
     }
 
     update(dragon: Dragon, elapsedMillis: number) {
 
         const assetHandler = AssetHandler.getInstance();
 
-        dragon.asset = assetHandler.get("dragon-1");
+        dragon.asset = assetHandler.get(`dragon-1${dragon.damageState ? this.flipFlop ? "-damage0" : "-damage1" : ""}`)
+
+
+
+        if (dragon.damageState) {
+            this.flipFlop = !this.flipFlop;
+        }
 
         this.elapsedMillis += (elapsedMillis - this.prevMillis!);
         this.prevMillis = elapsedMillis;
 
-
         if (!this.hasShotEgg) {
             setTimeout(() => {
-
                 const egg = new Egg(dragon.pos.x - 4, dragon.pos.y + 14);
-
                 gameObjects.push(egg);
+                dragon.shootingState = null;
             }, 250)
 
             this.hasShotEgg = true;
@@ -192,11 +218,31 @@ class DragonShootingState implements DragonState {
     };
 }
 
-class DragonHurtingState implements DragonState {
+class DragonDamagedState implements DragonState {
+
+    private prevMillis: number;
+    private elapsedMillisDiff: number;
+
+
+    constructor(elapsedMillis: number,) {
+        this.prevMillis = elapsedMillis;
+        this.elapsedMillisDiff = 0;
+
+    }
+
+    handleInput(dragon: Dragon, elapsedMillis: number, keys: KeyState) {
+        // Nothing can happen based on input
+    }
+
     update(dragon: Dragon, elapsedMillis: number) {
-        const assetHandler = AssetHandler.getInstance();
-        dragon.asset = assetHandler.get("dragon-0")
-    };
+        this.elapsedMillisDiff += (elapsedMillis - this.prevMillis);
+        this.prevMillis = elapsedMillis;
+
+        if (this.elapsedMillisDiff >= 500) {
+            dragon.damageState = null;
+        }
+
+    }
 }
 
 
@@ -208,6 +254,7 @@ export class Dragon implements GameObject {
 
     movingState: DragonState;
     shootingState: DragonState | null;
+    damageState: DragonState | null;
     asset: HTMLImageElement | null;
 
     constructor() {
@@ -215,6 +262,7 @@ export class Dragon implements GameObject {
         this.vel = { x: 0, y: 0 };
         this.movingState = new DragonIdleState(0);
         this.shootingState = null;
+        this.damageState = null;
         this.asset = null;
         this.id = "dragon";
     }
@@ -223,20 +271,41 @@ export class Dragon implements GameObject {
         const assetHandler = AssetHandler.getInstance();
         assetHandler.register("dragon-0", "./assets/dragon-0.png");
         assetHandler.register("dragon-1", "./assets/dragon-1.png");
+        assetHandler.register("dragon-0-damage1", "./assets/dragon-0-damage1.png");
+        assetHandler.register("dragon-1-damage1", "./assets/dragon-1-damage1.png");
+        assetHandler.register("dragon-0-damage0", "./assets/dragon-0-damage0.png");
+        assetHandler.register("dragon-1-damage0", "./assets/dragon-1-damage0.png");
         assetHandler.register("egg", "./assets/egg.png");
     }
 
     getCollisionBox(): CollisionBox {
-        return { y1: this.pos.y, x1: this.pos.x, x2: this.pos.x + 32, y2: this.pos.y + 48 }
+        return { y: this.pos.y + 2, x: this.pos.x + 7, w: 24, h: 45 }
     }
 
-    update(elapsedMillis: number, _: KeyState, collisions: Collision[], connections: ConnectedObjects) {
+    update(elapsedMillis: number, _: KeyState, collisions: Collision[]) {
+        this.checkCollisions(collisions, elapsedMillis)
         this.movingState.update(this, elapsedMillis);
+
+        if (this.damageState) {
+            this.damageState.update(this, elapsedMillis)
+        }
     }
 
     draw(ctx: CanvasRenderingContext2D) {
         if (this.asset === null) throw "Asset is null";
         ctx.drawImage(this.asset, this.pos.x, this.pos.y);
+    }
+
+    private checkCollisions(collisions: Collision[], elapsedMillis: number) {
+        for (const c of collisions) {
+
+            // If the collision is an egg that has been throwed at the dragon
+            if (c.obj instanceof Egg) {
+                if (c.obj.state === EggState.THROWED) {
+                    this.damageState = new DragonDamagedState(elapsedMillis)
+                }
+            }
+        }
     }
 
 }
