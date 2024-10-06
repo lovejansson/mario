@@ -1,4 +1,13 @@
-abstract class TreeNode {
+import { Dragon } from "./Dragon";
+import { gameObjects } from "./globalState";
+import { Mario } from "./Mario";
+
+
+interface TreeNode {
+    evaluate: () => boolean;
+}
+
+abstract class TreeBranch implements TreeNode {
     protected _nodes: TreeNode[]
 
     constructor() {
@@ -9,16 +18,15 @@ abstract class TreeNode {
         this._nodes.push(child)
     }
 
+    addChildren(children: TreeNode[]) {
+        this._nodes.push(...children)
+    }
+
     abstract evaluate(): boolean;
 }
 
 
-interface TreeNode {
-    children: TreeNode[];
-}
-
-
-class AndNode extends TreeNode {
+class AndBranch extends TreeBranch {
     evaluate(): boolean {
         for (const leaf of this._nodes) {
             const success = leaf.evaluate();
@@ -31,7 +39,7 @@ class AndNode extends TreeNode {
 }
 
 
-class OrNode extends TreeNode {
+class OrBranch extends TreeBranch {
     evaluate(): boolean {
         for (const leaf of this._nodes) {
             const success = leaf.evaluate();
@@ -44,11 +52,10 @@ class OrNode extends TreeNode {
 }
 
 
-class LeafNode extends TreeNode {
+class Leaf implements TreeNode {
     private _evaluateFn: () => boolean;
 
     constructor(evaluateFn: () => boolean) {
-        super();
         this._evaluateFn = evaluateFn;
     }
 
@@ -57,7 +64,14 @@ class LeafNode extends TreeNode {
     }
 }
 
-const root = new OrNode();
+function createRandomConditionLeaf(threshhold: number) {
+    return new Leaf(() => {
+        return Math.random() > threshhold;
+    });
+}
+
+
+export { TreeNode, AndBranch, OrBranch, Leaf, createRandomConditionLeaf }
 
 
 

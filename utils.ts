@@ -11,5 +11,16 @@ function dist(p1: Point, p2: Point): number {
 }
 
 
+function sample<T>(list: T[]) {
+    return list[Math.floor(Math.random() * list.length)]
+}
 
-export { dist };
+function isBetween(num: number, start: number, end: number) {
+    return num >= start && num <= end;
+}
+
+function isOutsideOf(num: number, start: number, end: number) {
+    return !isBetween(num, start, end);
+}
+
+export { dist, sample, isBetween, isOutsideOf };

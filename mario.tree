@@ -1,115 +1,87 @@
 ;; This is Mario's behaviour model
-
+;; 
 ?
 |    ->
 |    |    (Holding egg)
-|    |    |
 |    |    ?
-|    |    |    ->   (Standing on egg) 
-|    |    |    |    [Jump off egg] 
-|    |    |    |    [Approach dragon]
-|    |    |    ->  
-|    |    |    |    (Another egg is close)
-|    |    |    |    ?
-|    |    |    |    |    ->  (Too close)    
-|    |    |    |    |    |    ?
-|    |    |    |    |    |    |    ->
-|    |    |    |    |    |    |    |    (random)
-|    |    |    |    |    |    |    |    [Duck or Jump over egg]
-|    |    |    |    |    |    |    ->
-|    |    |    |    |    |    |    |    (random)
-|    |    |    |    |    |    |    |    [Take damage]
-|    |    |    |    |    ->
-|    |    |    |    |    |    !(Too close)
-|    |    |    |    |    |    ?    ->
-|    |    |    |    |    |    |    |    (random)
-|    |    |    |    |    |    |    |    [Jump onto egg]
-|    |    |    |    |    |    |    ->
-|    |    |    |    |    |    |    |    (random)
-|    |    |    |    |    |    |    |    [Walk to dragon]
-|    |    |    |
 |    |    |    ->
-|    |    |    |  (Close to dragon)
-|    |    |    |  ?
-|    |    |    |    |    ->  (Too close)    
-|    |    |    |    |    |    [Walk away from dragon]
-|    |    |    |    |    ->
-|    |    |    |    |    |    !(Too close)
-|    |    |    |    |    |    [Throw egg]   
-|    |    |    |
-|    |    |    ->  !(Close to dragon)
-|    |    |    |    [Walk to dragon]
-|    |    |    
-|    | 
-|    ->    
-|    |    !(Holding egg)
-|    |    ?
-|    |    |    ->   
 |    |    |    |    (Standing on egg) 
 |    |    |    |    ?
 |    |    |    |    |    ->
-|    |    |    |    |    |    (random)
-|    |    |    |    |    |    [Pick upp egg]
-|    |    |    |    |    |    
+|    |    |    |    |    |    (Mario is flying outside of view)
+|    |    |    |    |    |    [Jump off egg to the right]
 |    |    |    |    |    ->
 |    |    |    |    |    |    (random)
-|    |    |    |    |    |    [Jump off egg]   
+|    |    |    |    |    |    [Jump off egg at random direction]
+|    |    |    |    |    ->
+|    |    |    |    |    |    (random)
+|    |    |    |    |    |    [Walk off egg at random direction]
 |    |    |    ->
-|    |    |    |    (Close to dragon)
-|    |    |    |    [Walk away from dragon]
-|    |    |    ->  
-|    |    |    |    (egg exists) 
+|    |    |    |    (Egg is close) 
 |    |    |    |    ?
-|    |    |    |    |    (egg is close)
-|    |    |    |    |    ?
-|    |    |    |    |    |    (Too close)    
-|    |    |    |    |    |    ?
-|    |    |    |    |    |    |    ->
-|    |    |    |    |    |    |    |    (random)
-|    |    |    |    |    |    |    |    [Jump over egg or duck]
-|    |    |    |    |    |    |    ->
-|    |    |    |    |    |    |    |    (random)
-|    |    |    |    |    |    |    |    [Take damage i.e. stand idle]
-|    |    |    |    |    |    ->
-|    |    |    |    |    |    |    !(Too close)
-|    |    |    |    |    |    |    ?    ->
-|    |    |    |    |    |    |    |    |    (random)
-|    |    |    |    |    |    |    |    |    [Jump onto egg]
-|    |    |    |    |    |    |    |    ->
-|    |    |    |    |    |    |    |    |    (random)
-|    |    |    |    |    |    |    |    |    [Wait for egg i.e. stand idle]
-|    |    |    |    |    |    |    |    ->
-|    |    |    |    |    |    |    |    |    (random)
-|    |    |    |    |    |    |    |    |    [Walk to egg]    
-|    |    |    |    |    !(egg is close)
-|    |    |    |    |    ?
-|    |    |    |    |    |    -> 
-|    |    |    |    |    |    |    (random)
-|    |    |    |    |    |    |    [Wait for egg, stand idle]
-|    |    |    |    |    |    ->   (random)
-|    |    |    |    |    |   |    [Walk to egg]
+|    |    |    |    |    ->
+|    |    |    |    |    |    (random)
+|    |    |    |    |    |    [Do nothing]
+|    |    |    |    |    ->
+|    |    |    |    |    |    (random)
+|    |    |    |    |    |    [Jump onto egg]
+|    |    |    ->   (dragon is to close)
+|    |    |    |    [Avoid dragon]
+|    |    |    ->   (dragon is close)
+|    |    |    |    ?
+|    |    |    |    |    ->
+|    |    |    |    |    |    (random)
+|    |    |    |    |    |    [Throw egg at dragon]
+|    |    |    |    |    ->
+|    |    |    |    |    |    (random)
+|    |    |    |    |    |    [Do nothing]
+|    |    |    ->   (dragon is not close)
+|    |    |    |    [Walk towards dragon]
 
-  
-;; [Actions]
+
+
+;; The part where mario's main goal is to catch an egg that the dragon shoots
 ;;
-;; Avoid egg  (i.e. jump over it or duck)
-;; Avoid dragon (Run away from it)
-;; Wait for flying egg (Just stand idle)
-;; Go to flying egg (Walk in the direction of the egg)
-;; Jump onto egg    (Jump with x velocity to the direction where the egg is at)
-;; Pick up egg      (Invoke pick up action)
-;; Approach dragon  (Walk towards the dragon)
-;; Throw egg at dragon (Invoke throw action)
-;; Paste back and forth while waiting for egg
-;;  
-;; [Conditions]
-;; 
-;; Dragon has shot egg
-;; Holding egg ( Can throw it )
-;; Egg is close (Can jump on it)
-;; Egg is too close (needs to avoid)    
-;; Dragon is close  (can throw egg on dragon)
-;; Dragon is too close (needs to avoid dragon)
-;; Standing on egg
-;; Is picking up egg
+|    ->
+|    |    !(Holding egg)
+|    |    ?
+|    |    |    ->
+|    |    |    |    (Standing on egg) 
+|    |    |    |    ?
+|    |    |    |    |    ->
+|    |    |    |    |    |    (Mario is flying outside of view)
+|    |    |    |    |    |    [Jump off egg to the right]
+|    |    |    |    |    ->
+|    |    |    |    |    |    (random)
+|    |    |    |    |    |    [Jump off egg at random direction]
+|    |    |    |    |    ->
+|    |    |    |    |    |    (random)
+|    |    |    |    |    |    [Pick up egg]
+|    |    |    |    |    ->
+|    |    |    |    |    |    (random)
+|    |    |    |    |    |    [Walk off egg at random direction]
+|    |    |    ->   (dragon is to close)
+|    |    |    |    [Avoid dragon]
+|    |    |    ->
+|    |    |    |    (Egg is close) 
+|    |    |    |    ?
+|    |    |    |    |    ->
+|    |    |    |    |    |    (random)
+|    |    |    |    |    |    [Do nothing]
+|    |    |    |    |    ->
+|    |    |    |    |    |    (random)
+|    |    |    |    |    |    [Jump onto egg]
+|    |    |    ->
+|    |    |    |    (Egg is not close) 
+|    |    |    |    ?
+|    |    |    |    |    -> (Number of frames since last moving state switch is > 100)
+|    |    |    |    |    |    [Do nothing]
+|    |    |    |    |    ->
+|    |    |    |    |    |    (random)
+|    |    |    |    |    |    [Stand idle]
+|    |    |    |    |    ->
+|    |    |    |    |    |    (random)
+|    |    |    |    |    |    [Walk towards egg]
+|    
+|    
 
