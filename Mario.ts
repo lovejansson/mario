@@ -2,7 +2,7 @@ import AssetHandler from "./AssetHandler";
 import { GameObject, Collision, CollisionBox, GameObjectKind, Point, KeyState } from "./types";
 import { Egg, EggState } from "./Egg";
 import { Dragon } from "./Dragon";
-import { AndBranch, createRandomConditionLeaf, Leaf, OrBranch, TreeNode } from "./BehaviourTree";
+import { AndBranch, Leaf, OrBranch, TreeNode } from "./BehaviourTree";
 import { gameObjects } from "./globalState";
 import { isOutsideOf, sample } from "./utils";
 
@@ -526,6 +526,80 @@ class MarioThrowingItemState implements MarioState {
     }
 }
 
+export class MarioDyingState implements MarioState {
+    frame: number;
+
+    constructor() {
+        this.frame = 0;
+    }
+
+    handleInput(mario: Mario, elapsedMillis: number, keys: KeyState) {
+
+
+    }
+
+    update(mario: Mario,) {
+
+        mario.asset = this.getAsset(mario)
+
+        const vi = 0;
+        const g = 1;
+
+        mario.vel.y = vi + (g * this.frame);
+
+        const marioPosY = mario.pos.y + mario.vel.y;
+
+        // Has fallen off screen
+        if (marioPosY > 180) {
+            // Falling is done
+
+            mario.pos.x += mario.vel.x;
+            mario.pos.y = MARIO_STARTING_POS.y;
+            mario.vel.y = 0;
+            mario.vel.x = 0;
+
+            mario.movingState = new MarioIdleState();
+            mario.lives = 5;
+        } else {
+            mario.pos.y = marioPosY;
+            mario.pos.x += mario.vel.x;
+            this.frame++;
+        }
+
+    }
+
+    private getAsset(mario: Mario) {
+        const assetHandler = AssetHandler.getInstance();
+        return mario.direction === "left" ? assetHandler.get("walk-left1") : assetHandler.get("walk-right1");
+    }
+}
+
+export class MarioWinningState implements MarioState {
+
+    handleInput(mario: Mario, elapsedMillis: number, keys: KeyState) {
+        // Nothing can happen based on input
+    }
+
+    update(mario: Mario, elapsedMillis: number) {
+
+        // Should just show winning asset until dragon has fallen off screen
+
+        mario.asset = this.getAsset(mario);
+
+        const dragon = gameObjects.find(obj => obj instanceof Dragon);
+
+        if (dragon && dragon.hasDied()) {
+            mario.movingState = new MarioIdleState();
+            mario.lives = 5;
+        }
+    }
+
+    private getAsset(mario: Mario) {
+        const assetHandler = AssetHandler.getInstance();
+        return mario.direction === "left" ? assetHandler.get("walk-left1") : assetHandler.get("walk-right1");
+    }
+}
+
 
 /**
  * This class checks for collisions and updates marios state. 
@@ -552,14 +626,14 @@ class MarioCollisionsHandler {
                 isStandingOnEgg = true;
             }
 
-            // If not throwing or holding the egg that mario is colliding with, he will take damage
+            // If not throwing or holding the egg that mario is colliding with, or is already taking damage, he will take damage
             else if (!(collision.obj instanceof Egg && (mario.itemState instanceof MarioHoldingItemState && (mario.itemState as MarioHoldingItemState).getEgg() === collision.obj) || (mario.itemState instanceof MarioThrowingItemState &&
                 (mario.itemState as MarioThrowingItemState).getEgg() == collision.obj
-            ))) {
+            ) || mario.damageState !== null)) {
 
 
                 mario.damageState = new MarioDamageState(elapsedMillis);
-                mario.kills += 1;
+                mario.lives -= 1;
 
 
 
@@ -599,7 +673,7 @@ export class Mario implements GameObject {
     pos: Point;
     vel: Point;
     asset: HTMLImageElement | null;
-    kills: number;
+    lives: number;
 
     private _movingState: MarioState;
     itemState: MarioState | null;
@@ -608,13 +682,13 @@ export class Mario implements GameObject {
     collisionHandler: MarioCollisionsHandler;
     behaviourTree: TreeNode | null;
     actionIsRunning: boolean;
-
     movingStateCounter: Counter;
+
 
 
     constructor() {
         this.id = "mario";
-        this.kills = 0;
+        this.lives = 5;
         this.pos = { ...MARIO_STARTING_POS };
         this.vel = { x: 0, y: 0 };
         this.asset = null;
@@ -639,8 +713,14 @@ export class Mario implements GameObject {
         this._movingState = newState;
     }
 
+    hasDied() {
+        return !(this._movingState instanceof MarioDyingState)
+    }
+
     init() {
         const assetHandler = AssetHandler.getInstance();
+
+        assetHandler.register("heart", "./assets/heart.png");
 
         assetHandler.register("walk-right1", "./assets/mario-walk-right1.png");
         assetHandler.register("walk-right2", "./assets/mario-walk-right2.png");
@@ -701,7 +781,11 @@ export class Mario implements GameObject {
 
     update(elapsedMillis: number, keys: KeyState, collisions: Collision[]) {
 
+        this.checkGameState();
+
         this.collisionHandler.update(elapsedMillis, this, collisions);
+
+
 
         this._movingState.update(this, elapsedMillis);
         this.movingStateCounter.tick();
@@ -732,6 +816,21 @@ export class Mario implements GameObject {
 
     }
 
+    private checkGameState() {
+        if (this.lives === 0) {
+            // has lost
+            this.movingState = new MarioDyingState();
+        }
+
+        const dragon = gameObjects.find(obj => obj instanceof Dragon);
+
+        if (dragon && dragon.lives === 0) {
+            // dragon has died
+            this.movingState = new MarioWinningState();
+
+        }
+    }
+
 
     private createBehaviourTree() {
 
@@ -746,7 +845,6 @@ export class Mario implements GameObject {
         const notHoldingEggCondition = new Leaf(() => !(this.itemState instanceof MarioHoldingItemState))
         const notHoldingEggOr = new OrBranch();
         notHoldingEggAnd.addChildren([notHoldingEggCondition, notHoldingEggOr])
-
 
 
         // NOT HOLDING EGG STUFF
@@ -987,7 +1085,12 @@ export class Mario implements GameObject {
     }
 
     draw(ctx: CanvasRenderingContext2D) {
-        if (this.asset === null) throw "Asset is null";
+        if (this.asset === null) throw "Asset is null, should not happen";
+
+        for (let l = 0; l < this.lives; ++l) {
+            ctx.drawImage(AssetHandler.getInstance().get("heart"), 304 - l * 16, 0);
+        }
+
         ctx.drawImage(this.asset, this.pos.x, this.pos.y);
     }
 

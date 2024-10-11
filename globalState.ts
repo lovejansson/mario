@@ -9,3 +9,4 @@ export let gameObjects: GameObject[] = [];
 export function reassignGameObjects(updated: GameObject[]) {
     gameObjects = updated
 }
+

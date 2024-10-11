@@ -16,7 +16,6 @@ if (ctx === null) throw new Error("ctx is null");
 
 init().then(() => play(ctx));
 
-
 async function init() {
 
     ctx!.imageSmoothingEnabled = false;
@@ -65,6 +64,7 @@ function update(elapsedMillis: number) {
     const objToDelete: number[] = [];
 
     for (const [idx, obj] of Object.entries(gameObjects)) {
+
         const collisions = getCollisions(parseInt(idx));
 
         const deleteObj = obj.update(elapsedMillis, keys, collisions);
@@ -155,7 +155,6 @@ function getCollisionPoint(obj1: GameObject, obj2: GameObject): "east" | "west" 
             }
         }
 
-
     }
 
     return null;
@@ -165,6 +164,8 @@ function getCollisionPoint(obj1: GameObject, obj2: GameObject): "east" | "west" 
 function draw(ctx: CanvasRenderingContext2D) {
 
     const backgroundImage = AssetHandler.getInstance().get("background");
+
+
 
     ctx.canvas.width = backgroundImage.width;
     ctx.canvas.height = backgroundImage.height;
