@@ -4,13 +4,11 @@ export default class AssetHandler {
     private assets: Map<string, HTMLImageElement>;
     private paths: Map<string, string>;
 
-    // Private constructor to prevent instantiation
     private constructor() {
         this.assets = new Map();
         this.paths = new Map();
     }
 
-    // Public method to get the single instance
     public static getInstance(): AssetHandler {
         if (!AssetHandler.instance) {
             AssetHandler.instance = new AssetHandler();

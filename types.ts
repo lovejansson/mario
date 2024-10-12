@@ -17,7 +17,7 @@ export interface GameObject {
     getCollisionBox: () => CollisionBox;
     init: () => void;
     draw: (ctx: CanvasRenderingContext2D) => void;
-    update: (elapsedMillis: number, keys: KeyState, collisions: Collision[]) => boolean | void;
+    update: (elapsedMillis: number, collisions: Collision[]) => boolean | void;
 }
 
 export type Collision = {

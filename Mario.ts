@@ -7,11 +7,9 @@ import { gameObjects } from "./globalState";
 import { isOutsideOf, sample } from "./utils";
 
 
-
 const MARIO_STARTING_POS: Point = { y: 135 - 48, x: -6 };
 
 interface MarioState {
-    handleInput: (mario: Mario, elapsedMillis: number, keys: KeyState) => void;
     update: (mario: Mario, elapsedMillis: number) => void;
 }
 
@@ -33,36 +31,13 @@ class MarioIdleState implements MarioState {
 
     }
 
-    handleInput(mario: Mario, elapsedMillis: number, keys: KeyState) {
-        if (keys["a"] && !keys["d"]) {
-            mario.direction = "left";
-            mario.movingState = new MarioWalkingState();
-        } else if (!keys["a"] && keys["d"]) {
-            mario.direction = "right";
-            mario.movingState = new MarioWalkingState();
-        } else if (keys[" "]) {
-
-
-            if (mario.standingOnEggState) {
-
-                mario.standingOnEggState = null;
-            };
-            mario.movingState = new MarioJumpingState();
-        } else if (keys["s"] && mario.standingOnEggState !== null && !(mario.itemState instanceof MarioHoldingItemState)) {
-
-            mario.movingState = new MarioPickingState();
-        }
-    }
-
-    update(mario: Mario, elapsedMillis: number) {
+    update(mario: Mario, _: number) {
         mario.asset = this.getAsset(mario);
         mario.vel.x = 0;
         mario.vel.y = 0;
 
 
     }
-
-
 
     private getAsset(mario: Mario) {
         const assetHandler = AssetHandler.getInstance();
@@ -95,9 +70,6 @@ class MarioDamageState implements MarioState {
 
     }
 
-    handleInput(mario: Mario, elapsedMillis: number, keys: KeyState) {
-        // Nothing can happen based on input
-    }
 
     update(mario: Mario, elapsedMillis: number) {
         this.elapsedMillisDiff += (elapsedMillis - this.prevMillis);
@@ -133,18 +105,6 @@ class MarioWalkingState implements MarioState {
         this.elapsedMillisDiff = 0;
         this.totalElapsedMillis = 0;
         this.flipFlop = true;
-    }
-
-    handleInput(mario: Mario, elapsedMillis: number, keys: KeyState) {
-        /*    if (mario.direction === "left" && !keys["a"]) {
-               mario.movingState = new MarioIdleState();
-           } else if (mario.direction === "right" && !keys["d"]) {
-               mario.movingState = new MarioIdleState();
-           } else if (keys[" "]) {
-               mario.movingState = new MarioJumpingState();
-           } else if (keys["s"] && mario.standingOnEggState !== null && !(mario.itemState instanceof MarioHoldingItemState)) {
-               mario.movingState = new MarioPickingState(elapsedMillis);
-           } */
     }
 
     update(mario: Mario, elapsedMillis: number) {
@@ -223,15 +183,6 @@ class MarioJumpingState implements MarioState {
         this.flipFlop = true;
     }
 
-    handleInput(mario: Mario, _: number, keys: KeyState) {
-        /*  // Adjusts velocity x according to if user steers mario with a or d
-         if (keys["a"] && !keys["d"]) {
-             mario.vel.x = -1;
-         } else if (keys["d"] && !keys["a"]) {
-             mario.vel.x = 1;
-         } */
-    }
-
     update(mario: Mario, _: number) {
 
         mario.vel.x = mario.direction === "right" ? 1 : -1;
@@ -299,16 +250,7 @@ class MarioFallingState implements MarioState {
         this.frame = 0;
     }
 
-    handleInput(mario: Mario, elapsedMillis: number, keys: KeyState) {
-        // Adjusts velocity x according to if user steers mario with a or d
-        if (keys["a"] && !keys["d"]) {
-            mario.vel.x = -1;
-        } else if (keys["d"] && !keys["a"]) {
-            mario.vel.x = 1;
-        }
-    }
-
-    update(mario: Mario, elapsedMillis: number) {
+    update(mario: Mario, _: number) {
 
         mario.asset = this.getAsset(mario)
 
@@ -353,10 +295,6 @@ class MarioPickingState implements MarioState {
         this.prevMillis = null;
         this.elapsedMillisDiff = 0;
 
-    }
-
-    handleInput(mario: Mario, elapsedMillis: number, keys: KeyState) {
-        // Nothing can happen based on input
     }
 
     update(mario: Mario, elapsedMillis: number) {
@@ -406,14 +344,6 @@ class MarioHoldingItemState implements MarioState {
         this.elapsedMillisDiff = 0;
         this.prevMillis = elapsedMillis;
 
-    }
-
-    handleInput(mario: Mario, elapsedMillis: number, keys: KeyState) {
-        if (keys["ö"]) {
-            // Throw 
-            mario.itemState = new MarioThrowingItemState(this.egg);
-            this.egg.throw(mario.direction);
-        }
     }
 
     update(mario: Mario, elapsedMillis: number) {
@@ -468,11 +398,7 @@ class MarioStandingOnEggState implements MarioState {
         return this.egg;
     }
 
-    handleInput(mario: Mario, elapsedMillis: number, keys: KeyState) {
-
-    }
-
-    update(mario: Mario, elapsedMillis: number) {
+    update(mario: Mario, _: number) {
 
         // Update according to moving egg
         mario.pos.y += this.egg.vel.y;
@@ -491,10 +417,6 @@ class MarioThrowingItemState implements MarioState {
         this.prevMillis = null;
         this.elapsedMillisDiff = 0;
         this.egg = egg;
-    }
-
-    handleInput(mario: Mario, elapsedMillis: number, keys: KeyState) {
-        // Nothing can happen based on input
     }
 
     update(mario: Mario, elapsedMillis: number) {
@@ -532,13 +454,8 @@ export class MarioDeadState implements MarioState {
 
 
     constructor() {
-
         this.flipFlop = true;
         this.frame = 0;
-
-    }
-    handleInput(mario: Mario, elapsedMillis: number, keys: KeyState) {
-
 
     }
 
@@ -556,7 +473,6 @@ export class MarioDeadState implements MarioState {
         this.flipFlop = !this.flipFlop;
 
         mario.vel.x = 0;
-
 
         // Has fallen off screen
         if (marioPosY > 2000) {
@@ -584,11 +500,7 @@ export class MarioDeadState implements MarioState {
 
 export class MarioWinningState implements MarioState {
 
-    handleInput(mario: Mario, elapsedMillis: number, keys: KeyState) {
-        // Nothing can happen based on input
-    }
-
-    update(mario: Mario, elapsedMillis: number) {
+    update(mario: Mario, _: number) {
 
         // Should just show winning asset until dragon has fallen off screen
 
@@ -796,7 +708,7 @@ export class Mario implements GameObject {
         return { y: this.pos.y + 16, x: this.pos.x + 8, w: 20, h: 32 }
     }
 
-    update(elapsedMillis: number, keys: KeyState, collisions: Collision[]) {
+    update(elapsedMillis: number, collisions: Collision[]) {
 
         if (!(this.movingState instanceof MarioDeadState) && !(this.movingState instanceof MarioWinningState)) {
             this.checkGameState();
@@ -810,25 +722,20 @@ export class Mario implements GameObject {
 
         }
 
-
         this._movingState.update(this, elapsedMillis);
         this.movingStateCounter.tick();
 
 
-
         if (this.standingOnEggState !== null) {
-            this.standingOnEggState.handleInput(this, elapsedMillis, keys);
             this.standingOnEggState.update(this, elapsedMillis)
         }
 
         if (this.itemState !== null) {
-            this.itemState.handleInput(this, elapsedMillis, keys);
             this.itemState.update(this, elapsedMillis);
         }
 
 
         if (this.damageState !== null) {
-            this.damageState.handleInput(this, elapsedMillis, keys);
             this.damageState.update(this, elapsedMillis)
         }
 

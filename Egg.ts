@@ -14,7 +14,6 @@ export class Egg implements GameObject {
     id: string;
     pos: Point;
     vel: Point;
-    kind: GameObjectKind = GameObjectKind.EGG;
 
     private frame: number;
     state: EggState;
@@ -29,7 +28,7 @@ export class Egg implements GameObject {
     }
 
     init() {
-
+        // not needed for eggs
     }
 
     getCollisionBox(): CollisionBox {
@@ -55,7 +54,7 @@ export class Egg implements GameObject {
         this.frame = 0;
     }
 
-    update(_: number, __: KeyState, collisions: Collision[]) {
+    update(_: number, collisions: Collision[]) {
         switch (this.state) {
             case EggState.FLYING:
                 {

@@ -1,10 +1,9 @@
 import AssetHandler from "./AssetHandler";
-import { gameObjects, isDebugMode, keys, reassignGameObjects } from "./globalState";
+import { gameObjects, isDebugMode, reassignGameObjects } from "./globalState";
 import { Mario } from "./Mario";
 import { Dragon } from "./Dragon";
 import { GameObject, Collision } from "./types";
 
-const listenToKeys = ["a", "d", "s", " ", "ö"]
 
 const canvas = document.querySelector("canvas");
 
@@ -14,11 +13,11 @@ const ctx = canvas.getContext("2d");
 
 if (ctx === null) throw new Error("ctx is null");
 
-init().then(() => play(ctx));
+init(ctx).then(() => play(ctx)).catch(err => console.error(err));
 
-async function init() {
+async function init(ctx: CanvasRenderingContext2D) {
 
-    ctx!.imageSmoothingEnabled = false;
+    ctx.imageSmoothingEnabled = false;
 
     const mario = new Mario();
 
@@ -36,18 +35,6 @@ async function init() {
 
     gameObjects.push(mario);
     gameObjects.push(dragon);
-
-    addEventListener("keydown", (e) => {
-        if (listenToKeys.includes(e.key)) {
-            keys[e.key] = true;
-        }
-    });
-
-    addEventListener("keyup", (e) => {
-        if (listenToKeys.includes(e.key)) {
-            keys[e.key] = false;
-        }
-    });
 }
 
 
@@ -67,7 +54,7 @@ function update(elapsedMillis: number) {
 
         const collisions = getCollisions(parseInt(idx));
 
-        const deleteObj = obj.update(elapsedMillis, keys, collisions);
+        const deleteObj = obj.update(elapsedMillis, collisions);
 
         if (deleteObj) {
             objToDelete.push(parseInt(idx));

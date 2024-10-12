@@ -367,7 +367,7 @@ export class Dragon implements GameObject {
         return { y: this.pos.y + 2, x: this.pos.x + 6, w: 24, h: 45 }
     }
 
-    update(elapsedMillis: number, _: KeyState, collisions: Collision[]) {
+    update(elapsedMillis: number, collisions: Collision[]) {
         this.checkCollisions(collisions, elapsedMillis);
 
         if (!(this.movingState instanceof DragonDyingState) && !(this.movingState instanceof DragonWinningState)) this.checkGameState();

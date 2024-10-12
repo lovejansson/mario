@@ -1,8 +1,3 @@
-import { Dragon } from "./Dragon";
-import { gameObjects } from "./globalState";
-import { Mario } from "./Mario";
-
-
 interface TreeNode {
     evaluate: () => boolean;
 }
