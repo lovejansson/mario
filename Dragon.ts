@@ -235,7 +235,7 @@ class DragonDyingState implements DragonState {
 
     update(dragon: Dragon, elapsedMillis: number) {
 
-        dragon.vel.x = -1;
+        dragon.vel.x = 1;
 
         dragon.asset = this.getAsset(dragon)
 
@@ -257,7 +257,7 @@ class DragonDyingState implements DragonState {
             dragon.vel.x = 0;
 
             dragon.movingState = new DragonIdleState(elapsedMillis)
-            dragon.lives = 2;
+            dragon.lives = 5;
         } else {
             dragon.pos.y = dragonPosY;
             dragon.pos.x += dragon.vel.x;
@@ -349,7 +349,7 @@ export class Dragon implements GameObject {
         this.damageState = null;
         this.asset = null;
         this.id = "dragon";
-        this.lives = 2;
+        this.lives = 5;
     }
 
     init() {
@@ -364,7 +364,7 @@ export class Dragon implements GameObject {
     }
 
     getCollisionBox(): CollisionBox {
-        return { y: this.pos.y + 2, x: this.pos.x + 7, w: 24, h: 45 }
+        return { y: this.pos.y + 2, x: this.pos.x + 6, w: 24, h: 45 }
     }
 
     update(elapsedMillis: number, _: KeyState, collisions: Collision[]) {

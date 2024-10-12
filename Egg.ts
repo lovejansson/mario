@@ -33,7 +33,7 @@ export class Egg implements GameObject {
     }
 
     getCollisionBox(): CollisionBox {
-        return { y: this.pos.y, x: this.pos.x, h: 16, w: 18 }
+        return { y: this.pos.y, x: this.pos.x, h: 16, w: 19 }
     }
 
     draw(ctx: CanvasRenderingContext2D) {

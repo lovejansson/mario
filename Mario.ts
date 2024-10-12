@@ -526,13 +526,17 @@ class MarioThrowingItemState implements MarioState {
     }
 }
 
-export class MarioDyingState implements MarioState {
+export class MarioDeadState implements MarioState {
+    flipFlop: boolean;
     frame: number;
 
-    constructor() {
-        this.frame = 0;
-    }
 
+    constructor() {
+
+        this.flipFlop = true;
+        this.frame = 0;
+
+    }
     handleInput(mario: Mario, elapsedMillis: number, keys: KeyState) {
 
 
@@ -543,34 +547,38 @@ export class MarioDyingState implements MarioState {
         mario.asset = this.getAsset(mario)
 
         const vi = 0;
-        const g = 1;
+        const g = 0.2;
 
         mario.vel.y = vi + (g * this.frame);
 
+
         const marioPosY = mario.pos.y + mario.vel.y;
+        this.flipFlop = !this.flipFlop;
+
+        mario.vel.x = 0;
+
 
         // Has fallen off screen
-        if (marioPosY > 180) {
-            // Falling is done
-
-            mario.pos.x += mario.vel.x;
+        if (marioPosY > 2000) {
             mario.pos.y = MARIO_STARTING_POS.y;
+            mario.pos.x = MARIO_STARTING_POS.x;
             mario.vel.y = 0;
             mario.vel.x = 0;
 
             mario.movingState = new MarioIdleState();
-            mario.lives = 5;
+            mario.lives = 1;
         } else {
             mario.pos.y = marioPosY;
             mario.pos.x += mario.vel.x;
-            this.frame++;
+            this.frame += 1;
         }
 
     }
 
     private getAsset(mario: Mario) {
         const assetHandler = AssetHandler.getInstance();
-        return mario.direction === "left" ? assetHandler.get("walk-left1") : assetHandler.get("walk-right1");
+
+        return assetHandler.get(`dead-${mario.direction}${this.flipFlop ? "-damage" : ""}`);
     }
 }
 
@@ -584,19 +592,19 @@ export class MarioWinningState implements MarioState {
 
         // Should just show winning asset until dragon has fallen off screen
 
-        mario.asset = this.getAsset(mario);
+        mario.asset = this.getAsset();
 
         const dragon = gameObjects.find(obj => obj instanceof Dragon);
 
         if (dragon && dragon.hasDied()) {
             mario.movingState = new MarioIdleState();
-            mario.lives = 5;
+            mario.lives = 1;
         }
     }
 
-    private getAsset(mario: Mario) {
+    private getAsset() {
         const assetHandler = AssetHandler.getInstance();
-        return mario.direction === "left" ? assetHandler.get("walk-left1") : assetHandler.get("walk-right1");
+        return assetHandler.get("winning");
     }
 }
 
@@ -688,7 +696,7 @@ export class Mario implements GameObject {
 
     constructor() {
         this.id = "mario";
-        this.lives = 5;
+        this.lives = 1;
         this.pos = { ...MARIO_STARTING_POS };
         this.vel = { x: 0, y: 0 };
         this.asset = null;
@@ -714,7 +722,7 @@ export class Mario implements GameObject {
     }
 
     hasDied() {
-        return !(this._movingState instanceof MarioDyingState)
+        return !(this._movingState instanceof MarioDeadState)
     }
 
     init() {
@@ -742,6 +750,8 @@ export class Mario implements GameObject {
         assetHandler.register("walk-left-damage4", "./assets/mario-walk-left-damage4.png");
 
         assetHandler.register("lift", "./assets/mario-lift.png");
+
+
 
         assetHandler.register("lift-damage", "./assets/mario-lift-damage.png");
 
@@ -771,6 +781,13 @@ export class Mario implements GameObject {
         assetHandler.register("throw-left", "./assets/mario-throw-left.png");
         assetHandler.register("throw-right", "./assets/mario-throw-right.png");
 
+        assetHandler.register("winning", "./assets/mario-win.png");
+
+        assetHandler.register("dead-right", "./assets/mario-dead-right.png");
+        assetHandler.register("dead-right-damage", "./assets/mario-dead-right-damage.png");
+        assetHandler.register("dead-left", "./assets/mario-dead-left.png");
+        assetHandler.register("dead-left-damage", "./assets/mario-dead-left-damage.png");
+
         this.behaviourTree = this.createBehaviourTree();
 
     }
@@ -781,21 +798,22 @@ export class Mario implements GameObject {
 
     update(elapsedMillis: number, keys: KeyState, collisions: Collision[]) {
 
-        this.checkGameState();
+        if (!(this.movingState instanceof MarioDeadState) && !(this.movingState instanceof MarioWinningState)) {
+            this.checkGameState();
+            this.collisionHandler.update(elapsedMillis, this, collisions);
+            if (!(this._movingState instanceof MarioJumpingState) && !(this._movingState instanceof MarioPickingState) && !(this._movingState instanceof MarioFallingState)) {
 
-        this.collisionHandler.update(elapsedMillis, this, collisions);
+                if (this.behaviourTree !== null) {
+                    this.behaviourTree.evaluate();
+                }
+            }
 
+        }
 
 
         this._movingState.update(this, elapsedMillis);
         this.movingStateCounter.tick();
 
-        if (!(this._movingState instanceof MarioJumpingState) && !(this._movingState instanceof MarioPickingState) && !(this._movingState instanceof MarioFallingState)) {
-
-            if (this.behaviourTree !== null) {
-                this.behaviourTree.evaluate();
-            }
-        }
 
 
         if (this.standingOnEggState !== null) {
@@ -819,7 +837,7 @@ export class Mario implements GameObject {
     private checkGameState() {
         if (this.lives === 0) {
             // has lost
-            this.movingState = new MarioDyingState();
+            this.movingState = new MarioDeadState();
         }
 
         const dragon = gameObjects.find(obj => obj instanceof Dragon);
