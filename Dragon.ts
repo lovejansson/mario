@@ -1,8 +1,7 @@
 import AssetHandler from "./AssetHandler";
 import { Egg, EggState } from "./Egg";
-import { gameObjects } from "./globalState";
-import { Mario } from "./Mario";
-import { GameObject, Collision, CollisionBox, GameObjectKind, Point, KeyState } from "./types";
+import { gameObjects, gameState, setGameState } from "./globalState";
+import { GameObject, Collision, CollisionBox, Point, GameState } from "./types";
 
 
 const START_POS: Point = { y: 135 - 47, x: 250 };
@@ -194,7 +193,6 @@ class DragonShootingState implements DragonState {
         dragon.asset = assetHandler.get(`dragon-1${dragon.damageState ? this.flipFlop ? "-damage0" : "-damage1" : ""}`)
 
 
-
         if (dragon.damageState) {
             this.flipFlop = !this.flipFlop;
         }
@@ -228,75 +226,64 @@ class DragonDyingState implements DragonState {
         this.frame = 0;
         this.flipFlop = false;
     }
-    handleInput(dragon: Dragon, elapsedMillis: number, keys: KeyState) {
-
-
-    }
 
     update(dragon: Dragon, elapsedMillis: number) {
 
-        dragon.vel.x = 1;
-
-        dragon.asset = this.getAsset(dragon)
-
-        this.flipFlop = !this.flipFlop;
+        dragon.asset = this.getAsset(dragon);
 
         const vi = 0;
         const g = 0.2;
 
         dragon.vel.y = vi + (g * this.frame);
 
+
         const dragonPosY = dragon.pos.y + dragon.vel.y;
 
         // Has fallen off screen
-        if (dragonPosY > 1000) {
+        if (dragonPosY > 2000) {
             // Falling is done
             dragon.pos.y = START_POS.y;
+
             dragon.pos.x = START_POS.x;
             dragon.vel.y = 0;
             dragon.vel.x = 0;
 
+            setGameState(GameState.FIGHTING);
+
             dragon.movingState = new DragonIdleState(elapsedMillis)
             dragon.lives = 5;
+            // Keep falling out of screen
         } else {
+            dragon.vel.x = 1;
             dragon.pos.y = dragonPosY;
             dragon.pos.x += dragon.vel.x;
             this.frame++;
         }
-
     }
 
     private getAsset(dragon: Dragon) {
         const assetHandler = AssetHandler.getInstance();
-
-        return assetHandler.get(`dragon-0${dragon.damageState ? this.flipFlop ? "-damage0" : "-damage1" : ""}`)
+        this.flipFlop = !this.flipFlop; // Creates flickering damage state by swapping two assets each draw
+        return assetHandler.get(`dragon-0${dragon.damageState ? this.flipFlop ? "-damage0" : "-damage1" : ""}`);
     }
 }
 
 class DragonWinningState implements DragonState {
-
-
-
-    handleInput(dragon: Dragon, elapsedMillis: number, keys: KeyState) {
-        // Nothing can happen based on input
-    }
-
     update(dragon: Dragon, elapsedMillis: number) {
 
-        // Should just show winning asset until dragon has fallen off screen
+        // Should just show winning asset until mario has fallen off screen
 
         dragon.asset = this.getAsset(dragon);
 
-        const mario = gameObjects.find(obj => obj instanceof Mario);
+        if (gameState === GameState.FIGHTING) {
 
-        if (mario && mario.hasDied()) {
             dragon.movingState = new DragonIdleState(elapsedMillis);
         }
     }
 
-    private getAsset(dragon: Dragon) {
+    private getAsset(_: Dragon) {
         const assetHandler = AssetHandler.getInstance();
-        return assetHandler.get(`dragon-0`)
+        return assetHandler.get(`dragon-0`);
     }
 }
 
@@ -313,10 +300,6 @@ class DragonDamagedState implements DragonState {
 
     }
 
-    handleInput(dragon: Dragon, elapsedMillis: number, keys: KeyState) {
-        // Nothing can happen based on input
-    }
-
     update(dragon: Dragon, elapsedMillis: number) {
         this.elapsedMillisDiff += (elapsedMillis - this.prevMillis);
         this.prevMillis = elapsedMillis;
@@ -331,7 +314,6 @@ class DragonDamagedState implements DragonState {
 
 export class Dragon implements GameObject {
     id: string;
-    kind: GameObjectKind = GameObjectKind.DRAGON;
     pos: Point;
     vel: Point;
     lives: number;
@@ -368,33 +350,27 @@ export class Dragon implements GameObject {
     }
 
     update(elapsedMillis: number, collisions: Collision[]) {
-        this.checkCollisions(collisions, elapsedMillis);
+        this.checkFightStatus();
 
-        if (!(this.movingState instanceof DragonDyingState) && !(this.movingState instanceof DragonWinningState)) this.checkGameState();
-
+        if (gameState === GameState.FIGHTING) {
+            this.checkCollisions(collisions, elapsedMillis);
+            if (this.damageState) {
+                this.damageState.update(this, elapsedMillis)
+            }
+        }
 
         this.movingState.update(this, elapsedMillis);
-
-        if (this.damageState) {
-            this.damageState.update(this, elapsedMillis)
-        }
     }
 
-    checkGameState() {
-        if (this.lives === 0) {
+    checkFightStatus() {
+        if (gameState === GameState.FIGHTING && this.lives === 0) {
             this.movingState = new DragonDyingState();
+            setGameState(GameState.MARIO_WON);
             return;
-        }
-
-        const mario = gameObjects.find(obj => obj instanceof Mario);
-
-        if (mario && mario.lives === 0) {
+        } else if (gameState === GameState.DRAGON_WON && !(this.movingState instanceof DragonWinningState)) {
             this.movingState = new DragonWinningState();
+            this.pos.y = START_POS.y;
         }
-    }
-
-    hasDied() {
-        return !(this.movingState instanceof DragonDyingState)
     }
 
     draw(ctx: CanvasRenderingContext2D) {

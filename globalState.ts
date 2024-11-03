@@ -1,12 +1,15 @@
-import { GameObject, KeyState } from "./types";
+import { GameObject, GameState } from "./types";
 
 export let isDebugMode = true;
 
-export const keys: KeyState = {};
-
 export let gameObjects: GameObject[] = [];
+
+export let gameState = GameState.FIGHTING;
 
 export function reassignGameObjects(updated: GameObject[]) {
     gameObjects = updated
 }
 
+export function setGameState(newState: GameState) {
+    gameState = newState;
+}

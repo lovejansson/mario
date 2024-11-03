@@ -3,10 +3,11 @@ export type Point = {
     y: number;
 }
 
-export const enum GameObjectKind {
-    MARIO,
-    DRAGON,
-    EGG
+export enum GameState {
+    FIGHTING,
+
+    MARIO_WON,
+    DRAGON_WON,
 }
 
 export interface GameObject {
@@ -20,6 +21,7 @@ export interface GameObject {
     update: (elapsedMillis: number, collisions: Collision[]) => boolean | void;
 }
 
+
 export type Collision = {
     obj: GameObject,
     collisionPoint: "east" | "west" | "south" | "north";
@@ -31,7 +33,5 @@ export type CollisionBox = {
     y: number;
     h: number;
 }
-
-export type KeyState = { [key: string]: boolean };
 
 

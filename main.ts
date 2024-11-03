@@ -1,9 +1,10 @@
 import AssetHandler from "./AssetHandler";
-import { gameObjects, isDebugMode, reassignGameObjects } from "./globalState";
+import { gameObjects, gameState, isDebugMode, reassignGameObjects } from "./globalState";
 import { Mario } from "./Mario";
 import { Dragon } from "./Dragon";
-import { GameObject, Collision } from "./types";
-
+import { GameObject, Collision, GameState } from "./types";
+import { Platform } from "./Platform";
+import AudioHandler from "./AudioHandler";
 
 const canvas = document.querySelector("canvas");
 
@@ -23,9 +24,13 @@ async function init(ctx: CanvasRenderingContext2D) {
 
     const dragon = new Dragon();
 
+    const platform = new Platform();
+
     mario.init();
 
     dragon.init();
+
+    platform.init();
 
     const assetHandler = AssetHandler.getInstance();
 
@@ -33,20 +38,47 @@ async function init(ctx: CanvasRenderingContext2D) {
 
     await assetHandler.load();
 
+    const audioHandler = AudioHandler.getInstance();
+
+    audioHandler.createAudio("bg-fighting", "./assets/boss-fighting.ogg");
+    audioHandler.createAudio("bg-mario-won", "./assets/mario-won.mp3");
+    audioHandler.createAudio("bg-mario-died", "./assets/mario-died.mp3");
+
     gameObjects.push(mario);
     gameObjects.push(dragon);
+    gameObjects.push(platform);
+
+    const soundBtn = document.querySelector("#btn-sound");
+
+    const volume = document.querySelector("#volume");
+
+    if (volume) {
+        volume.addEventListener("change", (e) => {
+            audioHandler.setVolume(+((e.target as HTMLInputElement).value) / 100);
+        });
+
+        (volume as HTMLInputElement).value = "50";
+    }
+
+    if (soundBtn) {
+        soundBtn.addEventListener("click", () => {
+            audioHandler.onOffSwitch();
+        });
+    }
 }
 
-
-
 function play(ctx: CanvasRenderingContext2D, elapsedMillis?: number) {
-
     update(elapsedMillis ?? 0);
     draw(ctx);
     requestAnimationFrame((elapsedMillis) => play(ctx, elapsedMillis));
 }
 
 function update(elapsedMillis: number) {
+    updateBackgroundMusic();
+    updateGameObjects(elapsedMillis);
+}
+
+function updateGameObjects(elapsedMillis: number) {
 
     const objToDelete: number[] = [];
 
@@ -64,12 +96,40 @@ function update(elapsedMillis: number) {
     reassignGameObjects(gameObjects.filter((_, idx) => !objToDelete.includes(idx)));
 }
 
+
+function updateBackgroundMusic() {
+
+    const audioHandler = AudioHandler.getInstance();
+
+    if (audioHandler.isOn()) {
+        switch (gameState) {
+            case GameState.FIGHTING:
+                audioHandler.playAudio("bg-fighting", true);
+                audioHandler.stopAudio("bg-mario-won");
+                audioHandler.stopAudio("bg-mario-died");
+                break;
+            case GameState.MARIO_WON:
+                audioHandler.playAudio("bg-mario-won", true);
+                audioHandler.stopAudio("bg-fighting");
+                audioHandler.stopAudio("bg-mario-died");
+                break;
+            case GameState.DRAGON_WON:
+                audioHandler.playAudio("bg-mario-died", true);
+                audioHandler.stopAudio("bg-mario-won");
+                audioHandler.stopAudio("bg-fighting");
+                break;
+        }
+    }
+}
+
 function getCollisions(index: number) {
-    const collisions: Collision[] = []
+
+    const collisions: Collision[] = [];
+
     for (const [idx, obj] of Object.entries(gameObjects)) {
         if (parseInt(idx) !== index) {
-            // Check if colliding and where 
             const collisionPoint = getCollisionPoint(gameObjects[index], obj);
+
             if (collisionPoint) {
                 collisions.push({ obj, collisionPoint });
             }
@@ -118,11 +178,15 @@ function getCollisionPoint(obj1: GameObject, obj2: GameObject): "east" | "west" 
         const overlapX = distX > 0 ? maxDistX - distX : -maxDistX - distX;
         const overlapY = distY > 0 ? maxDistY - distY : -maxDistY - distY;
 
+
+
         if (overlapY !== 0 && overlapX !== 0) {
 
             // If the overlap in the y direction is bigger than in the x direction we decide that the collision accours in the x direction. Draw this out on paper to get it. 
             if (Math.abs(overlapY) > Math.abs(overlapX)) {
                 // Collision in x direction
+
+
 
                 if (overlapX > 0) {
 
@@ -132,9 +196,10 @@ function getCollisionPoint(obj1: GameObject, obj2: GameObject): "east" | "west" 
                     return "east"
                 }
             } else {
+
+
                 // Collision in y direction
                 if (overlapY > 0) {
-
                     return "north"
                 }
 
@@ -151,17 +216,18 @@ function getCollisionPoint(obj1: GameObject, obj2: GameObject): "east" | "west" 
 function draw(ctx: CanvasRenderingContext2D) {
 
     const backgroundImage = AssetHandler.getInstance().get("background");
-
-
+    const platformImage = AssetHandler.getInstance().get("platform");
 
     ctx.canvas.width = backgroundImage.width;
     ctx.canvas.height = backgroundImage.height;
 
     ctx.clearRect(0, 0, backgroundImage.width, backgroundImage.height);
     ctx.drawImage(backgroundImage, 0, 0);
+    ctx.drawImage(platformImage, Math.floor(320 / 2 - platformImage.width / 2), 50);
 
     for (const obj of gameObjects) {
         obj.draw(ctx);
+
         if (isDebugMode) {
             const box = obj.getCollisionBox();
 

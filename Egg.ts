@@ -1,13 +1,15 @@
 import AssetHandler from "./AssetHandler";
 import { Mario } from "./Mario";
-import { GameObject, Collision, CollisionBox, GameObjectKind, Point, KeyState } from "./types";
+import { GameObject, Collision, CollisionBox, Point } from "./types";
 
 
 export enum EggState {
     FLYING = "flying",
-    PICKED_UP = "picked-up",
+    HOLDED = "holded",
+    PICKED = "picked",
     THROWED = "throwed",
-    COLLIDED = "collided"
+    COLLIDED = "collided",
+    DROPPED = "dropped"
 }
 export class Egg implements GameObject {
 
@@ -41,21 +43,39 @@ export class Egg implements GameObject {
 
     }
 
-    // Connects this egg to a certain position. Used for when mario is holding the egg
+
     pickUp() {
-        this.state = EggState.PICKED_UP;
+        this.state = EggState.PICKED;
+    }
+
+    // Connects this egg to a certain position. Used for when mario is holding the egg
+    hold() {
+        this.state = EggState.HOLDED;
     }
 
     // Starts a throw of the egg from current position at 
     throw(dir: "right" | "left") {
-
         this.state = EggState.THROWED;
         this.vel.x = dir === "right" ? 8 : -8;
         this.frame = 0;
     }
 
+    drop() {
+        this.state = EggState.DROPPED;
+        this.frame = 0;
+    }
+
     update(_: number, collisions: Collision[]) {
         switch (this.state) {
+            // Mario is currently picking up the egg
+            case EggState.PICKED:
+                {
+                    this.vel.x = -1;
+                    this.vel.y = 0;
+                    this.pos.x += this.vel.x;
+
+                }
+                break;
             case EggState.FLYING:
                 {
 
@@ -71,7 +91,7 @@ export class Egg implements GameObject {
                     this.vel.x = -1;
                     this.vel.y = 0;
 
-                    if (this.pos.x < -16) {
+                    if (this.pos.x < -16) { // och mario inte plockar upp ägget
                         return true;
                     } else {
                         this.pos.x += this.vel.x;
@@ -79,10 +99,34 @@ export class Egg implements GameObject {
 
                 }
                 break;
-            case EggState.PICKED_UP:
+            case EggState.HOLDED:
                 // no updates, is controlled by other object.
                 break;
             case EggState.THROWED:
+                {
+                    const dragonCollision = collisions.find(c => c.obj.id === "dragon");
+
+                    if (dragonCollision !== undefined) {
+
+                        this.state = EggState.COLLIDED;
+                        this.vel.x = dragonCollision.collisionPoint === "east" ? -2 : 2;
+                        this.frame = 0;
+                        break;
+                    }
+
+                    const g = 0.25;
+                    const vi = -1;
+
+                    // Calculates the velocity vf = vi + at where vi is the initial jump velocity above and a is the gravity that pulls mario 1 pixel downwards. t is the number of frames. 
+                    this.vel.y = vi + (g * this.frame);
+
+                    this.pos.x += this.vel.x;
+                    this.pos.y += this.vel.y;
+                    this.frame++;
+
+                }
+                break;
+            case EggState.DROPPED:
                 {
                     const dragonCollision = collisions.find(c => c.obj.id === "dragon");
 
