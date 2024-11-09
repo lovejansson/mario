@@ -20,7 +20,7 @@ export class Platform implements GameObject {
 
     init() {
         const assetHandler = AssetHandler.getInstance();
-        assetHandler.register("platform", "./assets/platform.png");
+        assetHandler.register("platform", "./assets/images/platform.png");
     }
 
 

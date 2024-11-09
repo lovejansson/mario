@@ -4,7 +4,7 @@ export let isDebugMode = true;
 
 export let gameObjects: GameObject[] = [];
 
-export let gameState = GameState.FIGHTING;
+export let gameState = GameState.PAUSE;
 
 export function reassignGameObjects(updated: GameObject[]) {
     gameObjects = updated

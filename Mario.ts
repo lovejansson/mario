@@ -6,6 +6,7 @@ import { AndBranch, Leaf, OrBranch, TreeNode } from "./BehaviourTree";
 import { gameObjects, gameState, setGameState } from "./globalState";
 import { isOutsideOf, sample } from "./utils";
 import { Platform } from "./Platform";
+import AudioHandler from "./AudioHandler";
 
 
 const MARIO_STARTING_POS: Point = { y: 135 - 48, x: -6 };
@@ -64,13 +65,12 @@ class MarioDamageState implements MarioState {
     private prevMillis: number;
     private elapsedMillisDiff: number;
 
-
     constructor(elapsedMillis: number,) {
         this.prevMillis = elapsedMillis;
         this.elapsedMillisDiff = 0;
 
+        AudioHandler.getInstance().playAudio("mario-ouch")
     }
-
 
     update(mario: Mario, elapsedMillis: number) {
         this.elapsedMillisDiff += (elapsedMillis - this.prevMillis);
@@ -182,6 +182,7 @@ class MarioJumpingState implements MarioState {
 
     constructor() {
         this.flipFlop = true;
+        AudioHandler.getInstance().playAudio("mario-jump");
     }
 
     update(mario: Mario, _: number) {
@@ -288,6 +289,7 @@ class MarioPickingState implements MarioState {
     constructor() {
         this.prevMillis = null;
         this.elapsedMillisDiff = 0;
+        AudioHandler.getInstance().playAudio("mario-picking");
 
     }
 
@@ -306,13 +308,14 @@ class MarioPickingState implements MarioState {
 
 
 
-        if (this.elapsedMillisDiff >= 300 && mario.standingOnEggState) {
+        if (this.elapsedMillisDiff >= 1000 && mario.standingOnEggState) {
 
             const egg = mario.standingOnEggState.getEgg();
 
             mario.standingOnEggState = null;
             mario.movingState = new MarioFallingState();
-            mario.itemState = new MarioHoldingItemState(elapsedMillis, egg); // Should not enter this state if egg is null
+            mario.itemState = new MarioHoldingItemState(elapsedMillis, egg);
+            AudioHandler.getInstance().playAudio("mario-picked");
 
         }
     }
@@ -413,6 +416,10 @@ class MarioThrowingItemState implements MarioState {
         this.prevMillis = null;
         this.elapsedMillisDiff = 0;
         this.egg = egg;
+
+        const audioHandler = AudioHandler.getInstance();
+
+        audioHandler.playAudio("mario-throw");
     }
 
     update(mario: Mario, elapsedMillis: number) {
@@ -481,7 +488,7 @@ export class MarioDyingState implements MarioState {
 
             setGameState(GameState.FIGHTING);
             mario.movingState = new MarioIdleState();
-            mario.lives = 1;
+            mario.lives = 5;
         } else {
             mario.pos.y = marioPosY;
             mario.pos.x += mario.vel.x;
@@ -505,7 +512,7 @@ export class MarioWinningState implements MarioState {
 
         if (gameState === GameState.FIGHTING) {
             mario.movingState = new MarioIdleState();
-            mario.lives = 1;
+            mario.lives = 5;
         }
     }
 
@@ -630,7 +637,7 @@ export class Mario implements GameObject {
 
     constructor() {
         this.id = "mario";
-        this.lives = 1;
+        this.lives = 5;
         this.pos = { ...MARIO_STARTING_POS };
         this.vel = { x: 0, y: 0 };
         this.asset = null;
@@ -663,63 +670,72 @@ export class Mario implements GameObject {
     init() {
         const assetHandler = AssetHandler.getInstance();
 
-        assetHandler.register("heart", "./assets/heart.png");
+        assetHandler.register("heart", "./assets/images/heart.png");
 
-        assetHandler.register("walk-right1", "./assets/mario-walk-right1.png");
-        assetHandler.register("walk-right2", "./assets/mario-walk-right2.png");
-        assetHandler.register("walk-right3", "./assets/mario-walk-right3.png");
-        assetHandler.register("walk-right4", "./assets/mario-walk-right4.png");
-        assetHandler.register("walk-right-damage1", "./assets/mario-walk-right-damage1.png");
-        assetHandler.register("walk-right-damage2", "./assets/mario-walk-right-damage2.png");
-        assetHandler.register("walk-right-damage3", "./assets/mario-walk-right-damage3.png");
-        assetHandler.register("walk-right-damage4", "./assets/mario-walk-right-damage4.png");
+        assetHandler.register("walk-right1", "./assets/images/mario-walk-right1.png");
+        assetHandler.register("walk-right2", "./assets/images/mario-walk-right2.png");
+        assetHandler.register("walk-right3", "./assets/images/mario-walk-right3.png");
+        assetHandler.register("walk-right4", "./assets/images/mario-walk-right4.png");
+        assetHandler.register("walk-right-damage1", "./assets/images/mario-walk-right-damage1.png");
+        assetHandler.register("walk-right-damage2", "./assets/images/mario-walk-right-damage2.png");
+        assetHandler.register("walk-right-damage3", "./assets/images/mario-walk-right-damage3.png");
+        assetHandler.register("walk-right-damage4", "./assets/images/mario-walk-right-damage4.png");
 
-        assetHandler.register("walk-left1", "./assets/mario-walk-left1.png");
-        assetHandler.register("walk-left2", "./assets/mario-walk-left2.png");
-        assetHandler.register("walk-left3", "./assets/mario-walk-left3.png");
-        assetHandler.register("walk-left4", "./assets/mario-walk-left4.png");
+        assetHandler.register("walk-left1", "./assets/images/mario-walk-left1.png");
+        assetHandler.register("walk-left2", "./assets/images/mario-walk-left2.png");
+        assetHandler.register("walk-left3", "./assets/images/mario-walk-left3.png");
+        assetHandler.register("walk-left4", "./assets/images/mario-walk-left4.png");
 
-        assetHandler.register("walk-left-damage1", "./assets/mario-walk-left-damage1.png");
-        assetHandler.register("walk-left-damage2", "./assets/mario-walk-left-damage2.png");
-        assetHandler.register("walk-left-damage3", "./assets/mario-walk-left-damage3.png");
-        assetHandler.register("walk-left-damage4", "./assets/mario-walk-left-damage4.png");
+        assetHandler.register("walk-left-damage1", "./assets/images/mario-walk-left-damage1.png");
+        assetHandler.register("walk-left-damage2", "./assets/images/mario-walk-left-damage2.png");
+        assetHandler.register("walk-left-damage3", "./assets/images/mario-walk-left-damage3.png");
+        assetHandler.register("walk-left-damage4", "./assets/images/mario-walk-left-damage4.png");
 
-        assetHandler.register("lift", "./assets/mario-lift.png");
+        assetHandler.register("lift", "./assets/images/mario-lift.png");
 
-        assetHandler.register("lift-damage", "./assets/mario-lift-damage.png");
+        assetHandler.register("lift-damage", "./assets/images/mario-lift-damage.png");
 
-        assetHandler.register("walk-right-holding-item1", "./assets/mario-walk-right-holding-item1.png");
-        assetHandler.register("walk-right-holding-item2", "./assets/mario-walk-right-holding-item2.png");
-        assetHandler.register("walk-right-holding-item3", "./assets/mario-walk-right-holding-item3.png");
-        assetHandler.register("walk-right-holding-item4", "./assets/mario-walk-right-holding-item4.png");
-
-
-        assetHandler.register("walk-right-holding-item-damage1", "./assets/mario-walk-right-holding-item-damage1.png");
-        assetHandler.register("walk-right-holding-item-damage2", "./assets/mario-walk-right-holding-item-damage2.png");
-        assetHandler.register("walk-right-holding-item-damage3", "./assets/mario-walk-right-holding-item-damage3.png");
-        assetHandler.register("walk-right-holding-item-damage4", "./assets/mario-walk-right-holding-item-damage4.png");
-
-        assetHandler.register("walk-left-holding-item1", "./assets/mario-walk-left-holding-item1.png");
-        assetHandler.register("walk-left-holding-item2", "./assets/mario-walk-left-holding-item2.png");
-        assetHandler.register("walk-left-holding-item3", "./assets/mario-walk-left-holding-item3.png");
-        assetHandler.register("walk-left-holding-item4", "./assets/mario-walk-left-holding-item4.png");
+        assetHandler.register("walk-right-holding-item1", "./assets/images/mario-walk-right-holding-item1.png");
+        assetHandler.register("walk-right-holding-item2", "./assets/images/mario-walk-right-holding-item2.png");
+        assetHandler.register("walk-right-holding-item3", "./assets/images/mario-walk-right-holding-item3.png");
+        assetHandler.register("walk-right-holding-item4", "./assets/images/mario-walk-right-holding-item4.png");
 
 
-        assetHandler.register("walk-left-holding-item-damage1", "./assets/mario-walk-left-holding-item-damage1.png");
-        assetHandler.register("walk-left-holding-item-damage2", "./assets/mario-walk-left-holding-item-damage2.png");
-        assetHandler.register("walk-left-holding-item-damage3", "./assets/mario-walk-left-holding-item-damage3.png");
-        assetHandler.register("walk-left-holding-item-damage4", "./assets/mario-walk-left-holding-item-damage4.png");
+        assetHandler.register("walk-right-holding-item-damage1", "./assets/images/mario-walk-right-holding-item-damage1.png");
+        assetHandler.register("walk-right-holding-item-damage2", "./assets/images/mario-walk-right-holding-item-damage2.png");
+        assetHandler.register("walk-right-holding-item-damage3", "./assets/images/mario-walk-right-holding-item-damage3.png");
+        assetHandler.register("walk-right-holding-item-damage4", "./assets/images/mario-walk-right-holding-item-damage4.png");
+
+        assetHandler.register("walk-left-holding-item1", "./assets/images/mario-walk-left-holding-item1.png");
+        assetHandler.register("walk-left-holding-item2", "./assets/images/mario-walk-left-holding-item2.png");
+        assetHandler.register("walk-left-holding-item3", "./assets/images/mario-walk-left-holding-item3.png");
+        assetHandler.register("walk-left-holding-item4", "./assets/images/mario-walk-left-holding-item4.png");
 
 
-        assetHandler.register("throw-left", "./assets/mario-throw-left.png");
-        assetHandler.register("throw-right", "./assets/mario-throw-right.png");
+        assetHandler.register("walk-left-holding-item-damage1", "./assets/images/mario-walk-left-holding-item-damage1.png");
+        assetHandler.register("walk-left-holding-item-damage2", "./assets/images/mario-walk-left-holding-item-damage2.png");
+        assetHandler.register("walk-left-holding-item-damage3", "./assets/images/mario-walk-left-holding-item-damage3.png");
+        assetHandler.register("walk-left-holding-item-damage4", "./assets/images/mario-walk-left-holding-item-damage4.png");
 
-        assetHandler.register("winning", "./assets/mario-win.png");
 
-        assetHandler.register("dead-right", "./assets/mario-dead-right.png");
-        assetHandler.register("dead-right-damage", "./assets/mario-dead-right-damage.png");
-        assetHandler.register("dead-left", "./assets/mario-dead-left.png");
-        assetHandler.register("dead-left-damage", "./assets/mario-dead-left-damage.png");
+        assetHandler.register("throw-left", "./assets/images/mario-throw-left.png");
+        assetHandler.register("throw-right", "./assets/images/mario-throw-right.png");
+
+        assetHandler.register("winning", "./assets/images/mario-win.png");
+
+        assetHandler.register("dead-right", "./assets/images/mario-dead-right.png");
+        assetHandler.register("dead-right-damage", "./assets/images/mario-dead-right-damage.png");
+        assetHandler.register("dead-left", "./assets/images/mario-dead-left.png");
+        assetHandler.register("dead-left-damage", "./assets/images/mario-dead-left-damage.png");
+
+
+        const audioHandler = AudioHandler.getInstance();
+
+        audioHandler.createAudio("mario-throw", "./assets/audio/mario-throw.ogg");
+        audioHandler.createAudio("mario-picking", "./assets/audio/mario-picking.ogg");
+        audioHandler.createAudio("mario-picked", "./assets/audio/mario-picked.ogg");
+        audioHandler.createAudio("mario-ouch", "./assets/audio/mario-ouch.ogg");
+        audioHandler.createAudio("mario-jump", "./assets/audio/mario-jump.ogg");
 
         this.behaviourTree = this.createBehaviourTree();
 
@@ -755,11 +771,16 @@ export class Mario implements GameObject {
             if (this.damageState !== null) {
                 this.damageState.update(this, elapsedMillis)
             }
+
+        } else if (gameState === GameState.INTRO || gameState === GameState.PAUSE) {
+            if (!(this.movingState instanceof MarioIdleState)) {
+                this.movingState = new MarioIdleState();
+                this.direction = "right";
+            }
         }
 
         this._movingState.update(this, elapsedMillis);
         this.movingStateCounter.tick();
-
     }
 
     private isBlockingActionRunning() {
@@ -774,8 +795,9 @@ export class Mario implements GameObject {
 
             this.movingState = new MarioDyingState();
             setGameState(GameState.DRAGON_WON);
-        } else if (gameState === GameState.MARIO_WON && !(this.movingState instanceof MarioWinningState)) {
+        } else if (gameState === GameState.MARIO_WON && !(this.movingState instanceof MarioWinningState) && !(this.movingState instanceof MarioJumpingState)) {
             this.movingState = new MarioWinningState();
+
         }
 
     }

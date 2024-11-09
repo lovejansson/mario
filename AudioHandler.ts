@@ -38,40 +38,44 @@ export default class AudioHandler {
 
     }
 
-    public playAudio(id: string, loop: boolean) {
+    public playAudio(id: string, loop: boolean = false) {
 
-        const alreadyPlayingNode = this.playingAudioNodes.get(id);
+        if (this.onoff) {
 
-        if (alreadyPlayingNode) {
-            return;
+            const alreadyPlayingNode = this.playingAudioNodes.get(id);
+
+            if (alreadyPlayingNode) {
+                return;
+            }
+
+            // check if context is in suspended state (autoplay policy)
+            if (this.audioCtx.state === "suspended") {
+                this.audioCtx.resume();
+            }
+
+            const audioBuffer = this.audioMap.get(id);
+
+
+            if (!audioBuffer) throw new AudioNotFoundError(id);
+
+            const audioSource = this.audioCtx.createBufferSource();
+            audioSource.buffer = audioBuffer;
+
+            audioSource.loop = loop;
+
+            audioSource.connect(this.volumeNode);
+
+            audioSource.start();
+
+            // Save the source node so it can be stopped via stopAudio
+            this.playingAudioNodes.set(id, audioSource);
+
+            // Add event listener to delete the source node when it has stopped playing
+            audioSource.addEventListener("ended", () => {
+                this.playingAudioNodes.delete(id);
+            });
         }
 
-        // check if context is in suspended state (autoplay policy)
-        if (this.audioCtx.state === "suspended") {
-            this.audioCtx.resume();
-        }
-
-        const audioBuffer = this.audioMap.get(id);
-
-
-        if (!audioBuffer) throw new AudioNotFoundError(id);
-
-        const audioSource = this.audioCtx.createBufferSource();
-        audioSource.buffer = audioBuffer;
-
-        audioSource.loop = loop;
-
-        audioSource.connect(this.volumeNode);
-
-        audioSource.start();
-
-        // Save the source node so it can be stopped via stopAudio
-        this.playingAudioNodes.set(id, audioSource);
-
-        // Add event listener to delete the source node when it has stopped playing
-        audioSource.addEventListener("ended", () => {
-            this.playingAudioNodes.delete(id);
-        });
     }
 
     public setVolume(volume: number) {

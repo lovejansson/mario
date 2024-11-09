@@ -1,4 +1,5 @@
 import AssetHandler from "./AssetHandler";
+import AudioHandler from "./AudioHandler";
 import { Egg, EggState } from "./Egg";
 import { gameObjects, gameState, setGameState } from "./globalState";
 import { GameObject, Collision, CollisionBox, Point, GameState } from "./types";
@@ -9,6 +10,40 @@ const START_POS: Point = { y: 135 - 47, x: 250 };
 interface DragonState {
     update: (dragon: Dragon, elapsedMillis: number) => void;
 }
+
+/**
+ * Dragon's intro state
+ * 
+ * Transitions:
+ * - Into Idle state when game state switches to fighting
+ */
+class DragonIntroState implements DragonState {
+
+    private hasPlayedAudio: boolean;
+
+    constructor() {
+        this.hasPlayedAudio = false;
+    }
+
+    update(dragon: Dragon, elapsedMillis: number) {
+
+        if (!this.hasPlayedAudio) {
+            AudioHandler.getInstance().playAudio("birdo-intro");
+            this.hasPlayedAudio = true;
+        }
+
+        if (gameState === GameState.FIGHTING) dragon.movingState = new DragonIdleState(elapsedMillis)
+
+        dragon.pos.x = START_POS.x;
+        dragon.pos.y = START_POS.y;
+
+        const assetHandler = AssetHandler.getInstance();
+
+        dragon.asset = assetHandler.get(`dragon-0`);
+
+    };
+}
+
 
 /**
  * Dragon's idle state
@@ -184,6 +219,7 @@ class DragonShootingState implements DragonState {
         this.elapsedMillis = 0;
         this.hasShotEgg = false;
         this.flipFlop = false;
+
     }
 
     update(dragon: Dragon, elapsedMillis: number) {
@@ -204,7 +240,10 @@ class DragonShootingState implements DragonState {
             setTimeout(() => {
                 const egg = new Egg(dragon.pos.x - 4, dragon.pos.y + 14);
                 gameObjects.push(egg);
+
+                AudioHandler.getInstance().playAudio("shoot-egg");
                 dragon.shootingState = null;
+
             }, 250)
 
             this.hasShotEgg = true;
@@ -297,6 +336,7 @@ class DragonDamagedState implements DragonState {
     constructor(elapsedMillis: number,) {
         this.prevMillis = elapsedMillis;
         this.elapsedMillisDiff = 0;
+        AudioHandler.getInstance().playAudio("birdo-hurt");
 
     }
 
@@ -310,6 +350,9 @@ class DragonDamagedState implements DragonState {
 
     }
 }
+
+
+
 
 
 export class Dragon implements GameObject {
@@ -336,13 +379,19 @@ export class Dragon implements GameObject {
 
     init() {
         const assetHandler = AssetHandler.getInstance();
-        assetHandler.register("dragon-0", "./assets/dragon-0.png");
-        assetHandler.register("dragon-1", "./assets/dragon-1.png");
-        assetHandler.register("dragon-0-damage1", "./assets/dragon-0-damage1.png");
-        assetHandler.register("dragon-1-damage1", "./assets/dragon-1-damage1.png");
-        assetHandler.register("dragon-0-damage0", "./assets/dragon-0-damage0.png");
-        assetHandler.register("dragon-1-damage0", "./assets/dragon-1-damage0.png");
-        assetHandler.register("egg", "./assets/egg.png");
+        assetHandler.register("dragon-0", "./assets/images/dragon-0.png");
+        assetHandler.register("dragon-1", "./assets/images/dragon-1.png");
+        assetHandler.register("dragon-0-damage1", "./assets/images/dragon-0-damage1.png");
+        assetHandler.register("dragon-1-damage1", "./assets/images/dragon-1-damage1.png");
+        assetHandler.register("dragon-0-damage0", "./assets/images/dragon-0-damage0.png");
+        assetHandler.register("dragon-1-damage0", "./assets/images/dragon-1-damage0.png");
+        assetHandler.register("egg", "./assets/images/egg.png");
+
+        const audioHandler = AudioHandler.getInstance();
+
+        audioHandler.createAudio("shoot-egg", "./assets/audio/birdo-shoot-egg.ogg");
+        audioHandler.createAudio("birdo-hurt", "./assets/audio/birdo-hurt.ogg");
+        audioHandler.createAudio("birdo-intro", "./assets/audio/birdo-intro.ogg");
     }
 
     getCollisionBox(): CollisionBox {
@@ -350,13 +399,21 @@ export class Dragon implements GameObject {
     }
 
     update(elapsedMillis: number, collisions: Collision[]) {
+        console.log("STATE", gameState)
         this.checkFightStatus();
-
         if (gameState === GameState.FIGHTING) {
+
             this.checkCollisions(collisions, elapsedMillis);
             if (this.damageState) {
                 this.damageState.update(this, elapsedMillis)
             }
+        } else if (gameState === GameState.INTRO) {
+            if (!(this.movingState instanceof DragonIntroState)) {
+                this.movingState = new DragonIntroState();
+            }
+
+        } else if (gameState === GameState.PAUSE) {
+            this.movingState = new DragonIdleState(elapsedMillis);
         }
 
         this.movingState.update(this, elapsedMillis);

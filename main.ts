@@ -1,5 +1,5 @@
 import AssetHandler from "./AssetHandler";
-import { gameObjects, gameState, isDebugMode, reassignGameObjects } from "./globalState";
+import { gameObjects, gameState, isDebugMode, reassignGameObjects, setGameState } from "./globalState";
 import { Mario } from "./Mario";
 import { Dragon } from "./Dragon";
 import { GameObject, Collision, GameState } from "./types";
@@ -34,21 +34,22 @@ async function init(ctx: CanvasRenderingContext2D) {
 
     const assetHandler = AssetHandler.getInstance();
 
-    assetHandler.register("background", "./assets/background.png");
+    assetHandler.register("background", "./assets/images/background.png");
 
     await assetHandler.load();
 
     const audioHandler = AudioHandler.getInstance();
 
-    audioHandler.createAudio("bg-fighting", "./assets/boss-fighting.ogg");
-    audioHandler.createAudio("bg-mario-won", "./assets/mario-won.mp3");
-    audioHandler.createAudio("bg-mario-died", "./assets/mario-died.mp3");
+    audioHandler.createAudio("bg-fighting", "./assets/audio/boss-fighting.ogg");
+    audioHandler.createAudio("bg-mario-won", "./assets/audio/mario-won.ogg");
+    audioHandler.createAudio("bg-mario-died", "./assets/audio/mario-died.ogg");
 
     gameObjects.push(mario);
     gameObjects.push(dragon);
     gameObjects.push(platform);
 
-    const soundBtn = document.querySelector("#btn-sound");
+    const playBtn = document.querySelector("#btn-play-pause");
+
 
     const volume = document.querySelector("#volume");
 
@@ -60,9 +61,21 @@ async function init(ctx: CanvasRenderingContext2D) {
         (volume as HTMLInputElement).value = "50";
     }
 
-    if (soundBtn) {
-        soundBtn.addEventListener("click", () => {
-            audioHandler.onOffSwitch();
+    if (playBtn) {
+        playBtn.addEventListener("click", () => {
+            if (gameState === GameState.PAUSE) {
+
+                playBtn.innerHTML = "Pause"
+                AudioHandler.getInstance().onOffSwitch();
+                setGameState(GameState.INTRO);
+                setTimeout(() => {
+                    setGameState(GameState.FIGHTING)
+                }, 1500);
+            } else {
+                AudioHandler.getInstance().onOffSwitch();
+                playBtn.innerHTML = "Play"
+                setGameState(GameState.PAUSE);
+            }
         });
     }
 }
