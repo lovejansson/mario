@@ -1,4 +1,4 @@
-import AssetHandler from "./AssetHandler";
+import AssetManager from "./AssetManager";
 import { Mario } from "./Mario";
 import { GameObject, Collision, CollisionBox, Point } from "./types";
 
@@ -38,7 +38,7 @@ export class Egg implements GameObject {
     }
 
     draw(ctx: CanvasRenderingContext2D) {
-        const assetHandler = AssetHandler.getInstance();
+        const assetHandler = AssetManager.getInstance();
         ctx.drawImage(assetHandler.get("egg"), this.pos.x, this.pos.y);
 
     }

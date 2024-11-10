@@ -6,7 +6,7 @@ export type Point = {
 export enum GameState {
     FIGHTING,
     MARIO_WON,
-    DRAGON_WON,
+    BIRDO_WON,
     INTRO,
     PAUSE
 }

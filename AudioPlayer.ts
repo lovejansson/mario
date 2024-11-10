@@ -1,6 +1,6 @@
-export default class AudioHandler {
+export default class AudioPlayer {
 
-    private static instance: AudioHandler;
+    private static instance: AudioPlayer;
 
     private onoff: boolean;
 
@@ -22,22 +22,37 @@ export default class AudioHandler {
         this.volumeNode.connect(this.audioCtx.destination);
     }
 
-    public static getInstance(): AudioHandler {
-        if (!AudioHandler.instance) {
-            AudioHandler.instance = new AudioHandler();
+    /**
+     * Using the singleton pattern to return and/or create an application wide instance of an audioplayer
+     */
+    public static getInstance(): AudioPlayer {
+        if (!AudioPlayer.instance) {
+            AudioPlayer.instance = new AudioPlayer();
         }
-        return AudioHandler.instance;
+        return AudioPlayer.instance;
     }
 
-    public stopAudio(id: string) {
-        const source = this.playingAudioNodes.get(id);
+    /**
+    * Creates audio data from file at path with a specific id. This can later be played. 
+    */
+    public async createAudio(id: string, path: string) {
 
-        if (source) {
-            source.stop();
+        try {
+            // Load an audio file
+            const response = await fetch(path);
+            // Decode it
+            const audioBuffer = await this.audioCtx.decodeAudioData(await response.arrayBuffer());
+
+            // Save audio data in map to play later in 'playAudio'
+            this.audioMap.set(id, audioBuffer);
+        } catch (err) {
+            throw new AudioFetchError(path, err as Error);
         }
-
     }
 
+    /**
+    * Plays audio file with id, can loop. 
+    */
     public playAudio(id: string, loop: boolean = false) {
 
         if (this.onoff) {
@@ -78,26 +93,30 @@ export default class AudioHandler {
 
     }
 
+    /**
+     * Stops playing audio file with id. 
+     */
+    public stopAudio(id: string) {
+        const source = this.playingAudioNodes.get(id);
+
+        if (source) {
+            source.stop();
+        }
+
+    }
+
+    /**
+     * Sets the volume for the audio player. All audio will have the same volume. 
+     */
     public setVolume(volume: number) {
         if (volume < 0 || volume > 1) throw new InvalidVolumeRangeError(volume);
 
         this.volumeNode.gain.setValueAtTime(volume, this.audioCtx.currentTime);
     }
 
-    public async createAudio(id: string, path: string) {
-
-        try {
-            // Load an audio file
-            const response = await fetch(path);
-            // Decode it
-            const audioBuffer = await this.audioCtx.decodeAudioData(await response.arrayBuffer());
-
-            this.audioMap.set(id, audioBuffer);
-        } catch (err) {
-            throw new AudioFetchError(path, err as Error);
-        }
-    }
-
+    /**
+     * Turns the audio player on/off.
+     */
     public onOffSwitch() {
         this.onoff = !this.onoff;
 
@@ -114,7 +133,6 @@ export default class AudioHandler {
 
         for (const audioSource of this.playingAudioNodes.values()) {
             audioSource.stop()
-
         }
     }
 }

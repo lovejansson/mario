@@ -1,10 +1,10 @@
-import AssetHandler from "./AssetHandler";
+import AssetManager from "./AssetManager";
 import { gameObjects, gameState, isDebugMode, reassignGameObjects, setGameState } from "./globalState";
 import { Mario } from "./Mario";
-import { Dragon } from "./Dragon";
+import { Birdo } from "./Birdo";
 import { GameObject, Collision, GameState } from "./types";
 import { Platform } from "./Platform";
-import AudioHandler from "./AudioHandler";
+import AudioPlayer from "./AudioPlayer";
 
 const canvas = document.querySelector("canvas");
 
@@ -22,30 +22,30 @@ async function init(ctx: CanvasRenderingContext2D) {
 
     const mario = new Mario();
 
-    const dragon = new Dragon();
+    const birdo = new Birdo();
 
     const platform = new Platform();
 
     mario.init();
 
-    dragon.init();
+    birdo.init();
 
     platform.init();
 
-    const assetHandler = AssetHandler.getInstance();
+    const assetHandler = AssetManager.getInstance();
 
     assetHandler.register("background", "./assets/images/background.png");
 
     await assetHandler.load();
 
-    const audioHandler = AudioHandler.getInstance();
+    const audioHandler = AudioPlayer.getInstance();
 
     audioHandler.createAudio("bg-fighting", "./assets/audio/boss-fighting.ogg");
     audioHandler.createAudio("bg-mario-won", "./assets/audio/mario-won.ogg");
     audioHandler.createAudio("bg-mario-died", "./assets/audio/mario-died.ogg");
 
     gameObjects.push(mario);
-    gameObjects.push(dragon);
+    gameObjects.push(birdo);
     gameObjects.push(platform);
 
     const playBtn = document.querySelector("#btn-play-pause");
@@ -66,13 +66,13 @@ async function init(ctx: CanvasRenderingContext2D) {
             if (gameState === GameState.PAUSE) {
 
                 playBtn.innerHTML = "Pause"
-                AudioHandler.getInstance().onOffSwitch();
+                AudioPlayer.getInstance().onOffSwitch();
                 setGameState(GameState.INTRO);
                 setTimeout(() => {
                     setGameState(GameState.FIGHTING)
                 }, 1500);
             } else {
-                AudioHandler.getInstance().onOffSwitch();
+                AudioPlayer.getInstance().onOffSwitch();
                 playBtn.innerHTML = "Play"
                 setGameState(GameState.PAUSE);
             }
@@ -112,7 +112,7 @@ function updateGameObjects(elapsedMillis: number) {
 
 function updateBackgroundMusic() {
 
-    const audioHandler = AudioHandler.getInstance();
+    const audioHandler = AudioPlayer.getInstance();
 
     if (audioHandler.isOn()) {
         switch (gameState) {
@@ -126,7 +126,7 @@ function updateBackgroundMusic() {
                 audioHandler.stopAudio("bg-fighting");
                 audioHandler.stopAudio("bg-mario-died");
                 break;
-            case GameState.DRAGON_WON:
+            case GameState.BIRDO_WON:
                 audioHandler.playAudio("bg-mario-died", true);
                 audioHandler.stopAudio("bg-mario-won");
                 audioHandler.stopAudio("bg-fighting");
@@ -228,8 +228,8 @@ function getCollisionPoint(obj1: GameObject, obj2: GameObject): "east" | "west" 
 
 function draw(ctx: CanvasRenderingContext2D) {
 
-    const backgroundImage = AssetHandler.getInstance().get("background");
-    const platformImage = AssetHandler.getInstance().get("platform");
+    const backgroundImage = AssetManager.getInstance().get("background");
+    const platformImage = AssetManager.getInstance().get("platform");
 
     ctx.canvas.width = backgroundImage.width;
     ctx.canvas.height = backgroundImage.height;

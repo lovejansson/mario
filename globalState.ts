@@ -1,6 +1,6 @@
 import { GameObject, GameState } from "./types";
 
-export let isDebugMode = true;
+export let isDebugMode = false;
 
 export let gameObjects: GameObject[] = [];
 

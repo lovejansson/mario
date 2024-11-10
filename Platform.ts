@@ -1,5 +1,5 @@
 
-import AssetHandler from "./AssetHandler";
+import AssetManager from "./AssetManager";
 import { Collision, GameObject, Point } from "./types";
 
 export class Platform implements GameObject {
@@ -19,13 +19,13 @@ export class Platform implements GameObject {
 
 
     init() {
-        const assetHandler = AssetHandler.getInstance();
+        const assetHandler = AssetManager.getInstance();
         assetHandler.register("platform", "./assets/images/platform.png");
     }
 
 
     draw(ctx: CanvasRenderingContext2D) {
-        const platformImage = AssetHandler.getInstance().get("platform");
+        const platformImage = AssetManager.getInstance().get("platform");
         ctx.drawImage(platformImage, this.pos.x, this.pos.y);
     }
 

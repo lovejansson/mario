@@ -1,15 +1,15 @@
-import AssetHandler from "./AssetHandler";
+import AssetManager from "./AssetManager";
 import { GameObject, Collision, CollisionBox, Point, GameState } from "./types";
 import { Egg, EggState } from "./Egg";
-import { Dragon } from "./Dragon";
+import { Birdo } from "./Birdo";
 import { AndBranch, Leaf, OrBranch, TreeNode } from "./BehaviourTree";
 import { gameObjects, gameState, setGameState } from "./globalState";
 import { isOutsideOf, sample } from "./utils";
 import { Platform } from "./Platform";
-import AudioHandler from "./AudioHandler";
+import AudioPlayer from "./AudioPlayer";
 
 
-const MARIO_STARTING_POS: Point = { y: 135 - 48, x: -6 };
+const MARIO_STARTING_POS: Point = { y: 148 - 48, x: -6 };
 
 interface MarioState {
     update: (mario: Mario, elapsedMillis: number) => void;
@@ -42,7 +42,7 @@ class MarioIdleState implements MarioState {
     }
 
     private getAsset(mario: Mario) {
-        const assetHandler = AssetHandler.getInstance();
+        const assetHandler = AssetManager.getInstance();
 
         if (mario.damageState instanceof MarioDamageState) {
             this.flipFlop = !this.flipFlop;
@@ -69,7 +69,7 @@ class MarioDamageState implements MarioState {
         this.prevMillis = elapsedMillis;
         this.elapsedMillisDiff = 0;
 
-        AudioHandler.getInstance().playAudio("mario-ouch")
+        AudioPlayer.getInstance().playAudio("mario-ouch")
     }
 
     update(mario: Mario, elapsedMillis: number) {
@@ -134,7 +134,7 @@ class MarioWalkingState implements MarioState {
 
     private getAsset(mario: Mario) {
 
-        const assetHandler = AssetHandler.getInstance();
+        const assetHandler = AssetManager.getInstance();
 
         if (mario.damageState instanceof MarioDamageState) {
             this.flipFlop = !this.flipFlop;
@@ -182,7 +182,7 @@ class MarioJumpingState implements MarioState {
 
     constructor() {
         this.flipFlop = true;
-        AudioHandler.getInstance().playAudio("mario-jump");
+        AudioPlayer.getInstance().playAudio("mario-jump");
     }
 
     update(mario: Mario, _: number) {
@@ -219,7 +219,7 @@ class MarioJumpingState implements MarioState {
 
     private getAsset(mario: Mario) {
 
-        const assetHandler = AssetHandler.getInstance();
+        const assetHandler = AssetManager.getInstance();
 
         if (mario.damageState instanceof MarioDamageState) {
             this.flipFlop = !this.flipFlop;
@@ -275,7 +275,7 @@ class MarioFallingState implements MarioState {
     }
 
     private getAsset(mario: Mario) {
-        const assetHandler = AssetHandler.getInstance();
+        const assetHandler = AssetManager.getInstance();
         return assetHandler.get(`walk-${mario.direction}${mario.itemState instanceof MarioHoldingItemState ? "-holding-item" : ""}${mario.damageState instanceof MarioDamageState ? "-damage" : ""}2`);
 
     }
@@ -289,7 +289,7 @@ class MarioPickingState implements MarioState {
     constructor() {
         this.prevMillis = null;
         this.elapsedMillisDiff = 0;
-        AudioHandler.getInstance().playAudio("mario-picking");
+        AudioPlayer.getInstance().playAudio("mario-picking");
 
     }
 
@@ -315,13 +315,13 @@ class MarioPickingState implements MarioState {
             mario.standingOnEggState = null;
             mario.movingState = new MarioFallingState();
             mario.itemState = new MarioHoldingItemState(elapsedMillis, egg);
-            AudioHandler.getInstance().playAudio("mario-picked");
+            AudioPlayer.getInstance().playAudio("mario-picked");
 
         }
     }
 
     private getAsset(mario: Mario) {
-        const assetHandler = AssetHandler.getInstance();
+        const assetHandler = AssetManager.getInstance();
         return mario.damageState !== null ? assetHandler.get("lift-damage") : assetHandler.get("lift");
     }
 }
@@ -417,7 +417,7 @@ class MarioThrowingItemState implements MarioState {
         this.elapsedMillisDiff = 0;
         this.egg = egg;
 
-        const audioHandler = AudioHandler.getInstance();
+        const audioHandler = AudioPlayer.getInstance();
 
         audioHandler.playAudio("mario-throw");
     }
@@ -446,7 +446,7 @@ class MarioThrowingItemState implements MarioState {
     }
 
     private getAsset(mario: Mario) {
-        const assetHandler = AssetHandler.getInstance();
+        const assetHandler = AssetManager.getInstance();
         return mario.direction === "left" ? assetHandler.get("throw-left") : assetHandler.get("throw-right");
     }
 }
@@ -498,7 +498,7 @@ export class MarioDyingState implements MarioState {
     }
 
     private getAsset(mario: Mario) {
-        const assetHandler = AssetHandler.getInstance();
+        const assetHandler = AssetManager.getInstance();
 
         return assetHandler.get(`dead-${mario.direction}${this.flipFlop ? "-damage" : ""}`);
     }
@@ -517,7 +517,7 @@ export class MarioWinningState implements MarioState {
     }
 
     private getAsset() {
-        const assetHandler = AssetHandler.getInstance();
+        const assetHandler = AssetManager.getInstance();
         return assetHandler.get("winning");
     }
 }
@@ -668,7 +668,7 @@ export class Mario implements GameObject {
     }
 
     init() {
-        const assetHandler = AssetHandler.getInstance();
+        const assetHandler = AssetManager.getInstance();
 
         assetHandler.register("heart", "./assets/images/heart.png");
 
@@ -729,7 +729,7 @@ export class Mario implements GameObject {
         assetHandler.register("dead-left-damage", "./assets/images/mario-dead-left-damage.png");
 
 
-        const audioHandler = AudioHandler.getInstance();
+        const audioHandler = AudioPlayer.getInstance();
 
         audioHandler.createAudio("mario-throw", "./assets/audio/mario-throw.ogg");
         audioHandler.createAudio("mario-picking", "./assets/audio/mario-picking.ogg");
@@ -750,6 +750,8 @@ export class Mario implements GameObject {
         this.checkFightState();
 
         if (gameState === GameState.FIGHTING) {
+
+
 
             this.collisionHandler.update(elapsedMillis, this, collisions);
             if (!this.isBlockingActionRunning()) {
@@ -772,10 +774,19 @@ export class Mario implements GameObject {
                 this.damageState.update(this, elapsedMillis)
             }
 
-        } else if (gameState === GameState.INTRO || gameState === GameState.PAUSE) {
+        } else if (gameState === GameState.INTRO) {
             if (!(this.movingState instanceof MarioIdleState)) {
                 this.movingState = new MarioIdleState();
                 this.direction = "right";
+
+            }
+
+        } else if (gameState === GameState.PAUSE) {
+            if (!(this.movingState instanceof MarioIdleState)) {
+                this.movingState = new MarioIdleState();
+                this.direction = "right";
+                this.pos.x = MARIO_STARTING_POS.x;
+                this.pos.y = MARIO_STARTING_POS.y;
             }
         }
 
@@ -794,7 +805,7 @@ export class Mario implements GameObject {
             }
 
             this.movingState = new MarioDyingState();
-            setGameState(GameState.DRAGON_WON);
+            setGameState(GameState.BIRDO_WON);
         } else if (gameState === GameState.MARIO_WON && !(this.movingState instanceof MarioWinningState) && !(this.movingState instanceof MarioJumpingState)) {
             this.movingState = new MarioWinningState();
 
@@ -872,13 +883,13 @@ export class Mario implements GameObject {
         notHoldingEggOr.addChild(isStandingOnEggAnd);
 
 
-        const dragonIsCloseToTheRightAnd = new AndBranch();
-        const dragonIsCloseToTheLeftAnd = new AndBranch();
+        const bIsCloseToTheRightAnd = new AndBranch();
+        const bIsCloseToTheLeftAnd = new AndBranch();
 
-        const dragonIsCloseToTheRightCondition = this.createDragonIsCloseLeaf("right", 25);
-        const dragonIsCloseToTheLeftCondition = this.createDragonIsCloseLeaf("left", 25);
+        const bIsCloseToTheRightCondition = this.createBirdoIsCloseLeaf("right", 25);
+        const bIsCloseToTheLeftCondition = this.createBirdoIsCloseLeaf("left", 25);
 
-        const avoidDragonRightAction = new Leaf(() => {
+        const avoidBirdoRightAction = new Leaf(() => {
             this.direction = "left";
 
             if (!(this.movingState instanceof MarioWalkingState)) {
@@ -888,7 +899,7 @@ export class Mario implements GameObject {
             return true;
         });
 
-        const avoidDragonLeftAction = new Leaf(() => {
+        const avoidBirdoLeftAction = new Leaf(() => {
             this.direction = "right";
 
             if (!(this.movingState instanceof MarioWalkingState)) {
@@ -898,17 +909,17 @@ export class Mario implements GameObject {
             return true;
         });
 
-        dragonIsCloseToTheRightAnd.addChildren([dragonIsCloseToTheRightCondition, avoidDragonRightAction]);
-        dragonIsCloseToTheLeftAnd.addChildren([dragonIsCloseToTheLeftCondition, avoidDragonLeftAction]);
+        bIsCloseToTheRightAnd.addChildren([bIsCloseToTheRightCondition, avoidBirdoRightAction]);
+        bIsCloseToTheLeftAnd.addChildren([bIsCloseToTheLeftCondition, avoidBirdoLeftAction]);
 
-        const dragonIsCloseEnoughToTheRightAnd = new AndBranch();
-        const dragonIsCloseEnoughToTheLeftAnd = new AndBranch();
+        const bIsCloseEnoughToTheRightAnd = new AndBranch();
+        const bIsCloseEnoughToTheLeftAnd = new AndBranch();
 
-        const dragonIsCloseEnoughToTheRightCondition = this.createDragonIsCloseLeaf("right", 60, true);
+        const bIsCloseEnoughToTheRightCondition = this.createBirdoIsCloseLeaf("right", 60, true);
 
-        const dragonIsCloseEnoughToTheLeftCondition = this.createDragonIsCloseLeaf("left", 60, true);
+        const bIsCloseEnoughToTheLeftCondition = this.createBirdoIsCloseLeaf("left", 60, true);
 
-        const throwEggAtDragonRightAction = new Leaf(() => {
+        const throwEggAtBirdoRightAction = new Leaf(() => {
             this.direction = "right";
 
             if (!(this.itemState instanceof MarioHoldingItemState)) throw "Invalid tree state";
@@ -921,7 +932,7 @@ export class Mario implements GameObject {
             return true;
         });
 
-        const throwEggAtDragonLeftAction = new Leaf(() => {
+        const throwEggAtBirdoLeftAction = new Leaf(() => {
             this.direction = "left";
 
             if (!(this.itemState instanceof MarioHoldingItemState)) throw "Invalid tree state";
@@ -931,34 +942,34 @@ export class Mario implements GameObject {
             return true;
         });
 
-        dragonIsCloseEnoughToTheRightAnd.addChildren([dragonIsCloseEnoughToTheRightCondition, throwEggAtDragonRightAction]);
-        dragonIsCloseEnoughToTheLeftAnd.addChildren([dragonIsCloseEnoughToTheLeftCondition, throwEggAtDragonLeftAction]);
+        bIsCloseEnoughToTheRightAnd.addChildren([bIsCloseEnoughToTheRightCondition, throwEggAtBirdoRightAction]);
+        bIsCloseEnoughToTheLeftAnd.addChildren([bIsCloseEnoughToTheLeftCondition, throwEggAtBirdoLeftAction]);
 
-        const dragonIsNotCloseAnd = new AndBranch();
+        const bIsNotCloseAnd = new AndBranch();
 
-        const dragonIsNotCloseCondition = new Leaf(() => {
+        const bIsNotCloseCondition = new Leaf(() => {
 
-            const dragon = gameObjects.find(o => o instanceof Dragon);
+            const b = gameObjects.find(o => o instanceof Birdo);
 
-            if (!dragon) throw "No dragon internal error";
+            if (!b) throw "No b internal error";
 
             const marioBox = this.getCollisionBox();
-            const dragonBox = dragon.getCollisionBox();
+            const bBox = b.getCollisionBox();
 
             return !(
-                marioBox.x > dragonBox.x && dragonBox.x + dragonBox.w + 100 >= marioBox.x ||
-                marioBox.x < dragonBox.x + dragonBox.w && marioBox.x + marioBox.w + 100 >= dragonBox.x);
+                marioBox.x > bBox.x && bBox.x + bBox.w + 100 >= marioBox.x ||
+                marioBox.x < bBox.x + bBox.w && marioBox.x + marioBox.w + 100 >= bBox.x);
         });
 
-        const walkTowardsDragonAction = new Leaf(() => {
-            const dragon = gameObjects.find(o => o instanceof Dragon);
+        const walkTowardsBirdoAction = new Leaf(() => {
+            const b = gameObjects.find(o => o instanceof Birdo);
 
-            if (!dragon) throw "No dragon internal error";
+            if (!b) throw "No b internal error";
 
             const marioBox = this.getCollisionBox();
-            const dragonBox = dragon.getCollisionBox();
+            const bBox = b.getCollisionBox();
 
-            if (marioBox.x < dragonBox.x) {
+            if (marioBox.x < bBox.x) {
                 this.direction = "right"
             } else {
                 this.direction = "left"
@@ -971,7 +982,7 @@ export class Mario implements GameObject {
             return true;
         });
 
-        dragonIsNotCloseAnd.addChildren([dragonIsNotCloseCondition, walkTowardsDragonAction])
+        bIsNotCloseAnd.addChildren([bIsNotCloseCondition, walkTowardsBirdoAction])
 
         const eggIsCloseAnd = new AndBranch();
 
@@ -1048,19 +1059,19 @@ export class Mario implements GameObject {
         const isStandingOnPlatformAction = new Leaf(() => {
 
             const platform = gameObjects.find(obj => obj instanceof Platform);
-            const dragon = gameObjects.find(obj => obj instanceof Dragon);
+            const b = gameObjects.find(obj => obj instanceof Birdo);
 
             if (!platform) throw "Internal error platform should exist";
-            if (!dragon) throw "Internal error dragon should exist";
+            if (!b) throw "Internal error b should exist";
 
             const marioBox = this.getCollisionBox();
             const platformBox = platform.getCollisionBox();
-            const dragonBox = dragon.getCollisionBox();
+            const bBox = b.getCollisionBox();
 
-            const dragonMarioDistX = dragonBox.x - marioBox.x;
+            const bMarioDistX = bBox.x - marioBox.x;
 
-            // close to right edge and dragon is not close so it is safe to jump or walk down
-            if (marioBox.x > platformBox.x + platformBox.w - marioBox.w / 2 && this.direction === "right" && dragonMarioDistX >= 50) {
+            // close to right edge and b is not close so it is safe to jump or walk down
+            if (marioBox.x > platformBox.x + platformBox.w - marioBox.w / 2 && this.direction === "right" && bMarioDistX >= 50) {
 
                 const rand = Math.random();
                 if (rand < 0.5) {
@@ -1125,8 +1136,8 @@ export class Mario implements GameObject {
         notHoldingEggOr.addChild(isStandingOnPlatformAnd);
         notHoldingEggOr.addChild(eggIsCloseAnd);
         notHoldingEggOr.addChild(platFormIsCloseRightAnd);
-        notHoldingEggOr.addChild(dragonIsCloseToTheRightAnd);
-        notHoldingEggOr.addChild(dragonIsCloseToTheLeftAnd);
+        notHoldingEggOr.addChild(bIsCloseToTheRightAnd);
+        notHoldingEggOr.addChild(bIsCloseToTheLeftAnd);
 
         const eggIsNotCloseAnd = new AndBranch();
 
@@ -1170,10 +1181,10 @@ export class Mario implements GameObject {
         holdingEggOr.addChild(eggIsCloseAnd);
         holdingEggOr.addChild(isStandingOnPlatformAnd);
         holdingEggOr.addChild(platFormIsCloseRightAnd);
-        holdingEggOr.addChildren([dragonIsCloseToTheLeftAnd, dragonIsCloseToTheRightAnd]);
-        holdingEggOr.addChild(dragonIsCloseEnoughToTheLeftAnd);
-        holdingEggOr.addChild(dragonIsCloseEnoughToTheRightAnd);
-        holdingEggOr.addChild(dragonIsNotCloseAnd);
+        holdingEggOr.addChildren([bIsCloseToTheLeftAnd, bIsCloseToTheRightAnd]);
+        holdingEggOr.addChild(bIsCloseEnoughToTheLeftAnd);
+        holdingEggOr.addChild(bIsCloseEnoughToTheRightAnd);
+        holdingEggOr.addChild(bIsNotCloseAnd);
 
         root.addChildren([notHoldingEggAnd, holdingEggAnd]);
 
@@ -1184,28 +1195,28 @@ export class Mario implements GameObject {
         if (this.asset === null) throw "Asset is null, should not happen";
 
         for (let l = 0; l < this.lives; ++l) {
-            ctx.drawImage(AssetHandler.getInstance().get("heart"), 304 - l * 16, 0);
+            ctx.drawImage(AssetManager.getInstance().get("heart"), 304 - l * 16, 0);
         }
 
         ctx.drawImage(this.asset, this.pos.x, this.pos.y);
     }
 
-    private createDragonIsCloseLeaf(side: "right" | "left", closeDist: number, addRandomizedDiffDist?: boolean) {
+    private createBirdoIsCloseLeaf(side: "right" | "left", closeDist: number, addRandomizedDiffDist?: boolean) {
 
         return new Leaf(() => {
-            const dragon = gameObjects.find(o => o instanceof Dragon);
+            const b = gameObjects.find(o => o instanceof Birdo);
 
-            if (!dragon) throw "No dragon internal error";
+            if (!b) throw "No b internal error";
 
             const marioBox = this.getCollisionBox();
-            const dragonBox = dragon.getCollisionBox();
+            const bBox = b.getCollisionBox();
 
             const doubleCloseDiff = addRandomizedDiffDist ? Math.random() > 0.5 : false;
             const dist = doubleCloseDiff ? closeDist + closeDist : closeDist;
 
             return side === "left" ?
-                marioBox.x > dragonBox.x && dragonBox.x + dragonBox.w + dist >= marioBox.x :
-                marioBox.x < dragonBox.x + dragonBox.w && marioBox.x + marioBox.w + dist >= dragonBox.x;
+                marioBox.x > bBox.x && bBox.x + bBox.w + dist >= marioBox.x :
+                marioBox.x < bBox.x + bBox.w && marioBox.x + marioBox.w + dist >= bBox.x;
         });
     }
 }

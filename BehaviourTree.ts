@@ -20,7 +20,6 @@ abstract class TreeBranch implements TreeNode {
     abstract evaluate(): boolean;
 }
 
-
 class AndBranch extends TreeBranch {
     evaluate(): boolean {
         for (const leaf of this._nodes) {
@@ -33,7 +32,6 @@ class AndBranch extends TreeBranch {
     }
 }
 
-
 class OrBranch extends TreeBranch {
     evaluate(): boolean {
         for (const leaf of this._nodes) {
@@ -45,7 +43,6 @@ class OrBranch extends TreeBranch {
         return false;
     }
 }
-
 
 class Leaf implements TreeNode {
     private _evaluateFn: () => boolean;

@@ -1,5 +1,5 @@
-export default class AssetHandler {
-    private static instance: AssetHandler;
+export default class AssetManager {
+    private static instance: AssetManager;
 
     private assets: Map<string, HTMLImageElement>;
     private paths: Map<string, string>;
@@ -9,17 +9,26 @@ export default class AssetHandler {
         this.paths = new Map();
     }
 
-    public static getInstance(): AssetHandler {
-        if (!AssetHandler.instance) {
-            AssetHandler.instance = new AssetHandler();
+    /**
+     * Using the singleton pattern to return and/or create an application wide instance of an asset manager
+     */
+    public static getInstance(): AssetManager {
+        if (!AssetManager.instance) {
+            AssetManager.instance = new AssetManager();
         }
-        return AssetHandler.instance;
+        return AssetManager.instance;
     }
 
+    /**
+     * Register a path to an image that will be created/loaded in load()
+     */
     public register(name: string, path: string) {
         this.paths.set(name, path);
     }
 
+    /**
+     * Creates images for all paths added to the assets map in 'register'. 
+     */
     public async load() {
         const loadPromises: Promise<[string, HTMLImageElement]>[] = [];
 
@@ -54,9 +63,6 @@ export default class AssetHandler {
 
     /**
      * Get the specifiec image for drawing onto canvas
-     * @param name - The name of the image.
-     * @returns The image.
-     * @throws {AssetNotLoadedError} If no image have been registered/loaded i.e. doesn't exist in the assets Map.
      */
     public get(name: string): HTMLImageElement {
         const image = this.assets.get(name);
