@@ -35,6 +35,7 @@ async function init(ctx: CanvasRenderingContext2D) {
     const assetHandler = AssetManager.getInstance();
 
     assetHandler.register("background", "./assets/images/background.png");
+    assetHandler.register("start-screen", "./assets/images/start-screen.png");
 
     await assetHandler.load();
 
@@ -228,28 +229,38 @@ function getCollisionPoint(obj1: GameObject, obj2: GameObject): "east" | "west" 
 
 function draw(ctx: CanvasRenderingContext2D) {
 
-    const backgroundImage = AssetManager.getInstance().get("background");
-    const platformImage = AssetManager.getInstance().get("platform");
+    if (gameState === GameState.PAUSE) {
+        const backgroundImage = AssetManager.getInstance().get("start-screen");
 
-    ctx.canvas.width = backgroundImage.width;
-    ctx.canvas.height = backgroundImage.height;
+        ctx.canvas.width = backgroundImage.width;
+        ctx.canvas.height = backgroundImage.height;
 
-    ctx.clearRect(0, 0, backgroundImage.width, backgroundImage.height);
-    ctx.drawImage(backgroundImage, 0, 0);
-    ctx.drawImage(platformImage, Math.floor(320 / 2 - platformImage.width / 2), 50);
+        ctx.clearRect(0, 0, backgroundImage.width, backgroundImage.height);
+        ctx.drawImage(backgroundImage, 0, 0);
 
-    for (const obj of gameObjects) {
-        obj.draw(ctx);
+    } else {
+        const backgroundImage = AssetManager.getInstance().get("background");
+        const platformImage = AssetManager.getInstance().get("platform");
 
-        if (isDebugMode) {
-            const box = obj.getCollisionBox();
+        ctx.canvas.width = backgroundImage.width;
+        ctx.canvas.height = backgroundImage.height;
 
-            ctx.imageSmoothingEnabled = false;
-            ctx.strokeStyle = "red";
-            ctx.lineWidth = 1;
-            ctx.strokeRect(box.x - 0.5, box.y - 0.5, box.w, box.h);
+        ctx.clearRect(0, 0, backgroundImage.width, backgroundImage.height);
+        ctx.drawImage(backgroundImage, 0, 0);
+        ctx.drawImage(platformImage, Math.floor(320 / 2 - platformImage.width / 2), 50);
+
+        for (const obj of gameObjects) {
+            obj.draw(ctx);
+
+            if (isDebugMode) {
+                const box = obj.getCollisionBox();
+
+                ctx.imageSmoothingEnabled = false;
+                ctx.strokeStyle = "red";
+                ctx.lineWidth = 1;
+                ctx.strokeRect(box.x - 0.5, box.y - 0.5, box.w, box.h);
+            }
         }
     }
-
 }
 
