@@ -15,6 +15,7 @@ export interface GameObject {
     id: string;
     pos: Point;
     vel: Point;
+    type: string;
 
     getCollisionBox: () => CollisionBox;
     init: () => void;

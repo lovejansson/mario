@@ -5,61 +5,55 @@
 |    |    (Holding egg)
 |    |    ?
 |    |    |    ->
-|    |    |    |    (Standing on egg) 
+|    |    |    |    (is standing on platform) 
 |    |    |    |    ?
 |    |    |    |    |    ->
-|    |    |    |    |    |    (Mario is flying outside of view)
-|    |    |    |    |    |    [Jump off egg to the right]
+|    |    |    |    |    |    (close to the left edge)
+|    |    |    |    |    |    [Jump down or turn right]
+|    |    |    |    |    ->
+|    |    |    |    |    |    (close to the right edge and possible to jump down)
+|    |    |    |    |    |    [Jump off to the right]
+|    |    |    |    |    ->
+|    |    |    |    |    |    (else)
+|    |    |    |    |    |    [randomly walk at some direction or stand idle for x frames]
+|    |    |    ->
+|    |    |    |    (Platform is close) 
+|    |    |    |    ?
+|    |    |    |    |    -> (random)
+|    |    |    |    |    |    [jump onto platform]
 |    |    |    |    |    ->
 |    |    |    |    |    |    (random)
-|    |    |    |    |    |    [Jump off egg at random direction]
-|    |    |    |    |    ->
-|    |    |    |    |    |    (random)
-|    |    |    |    |    |    [Walk off egg at random direction]
+|    |    |    |    |    |    [ignore]
 |    |    |    ->
 |    |    |    |    (Egg is close) 
-|    |    |    |    ?
-|    |    |    |    |    ->
-|    |    |    |    |    |    (random)
-|    |    |    |    |    |    [Do nothing]
-|    |    |    |    |    ->
-|    |    |    |    |    |    (random)
-|    |    |    |    |    |    [Jump onto egg]
-|    |    |    ->   (dragon is to close)
-|    |    |    |    [Avoid dragon]
+|    |    |    |    [avoid egg]
 |    |    |    ->   (dragon is close)
-|    |    |    |    ?
-|    |    |    |    |    ->
-|    |    |    |    |    |    (random)
-|    |    |    |    |    |    [Throw egg at dragon]
-|    |    |    |    |    ->
-|    |    |    |    |    |    (random)
-|    |    |    |    |    |    [Do nothing]
-|    |    |    ->   (dragon is not close)
+|    |    |    |    [Throw egg at dragon]
+|    |    |    ->   (dragon is too close)
+|    |    |    |    [Avoid dragon]
+|    |    |    ->   (else)
 |    |    |    |    [Walk towards dragon]
 
 
-
 ;; The part where mario's main goal is to catch an egg that the dragon shoots
-;;
 |    ->
 |    |    !(Holding egg)
 |    |    ?
 |    |    |    ->
-|    |    |    |    (Standing on egg) 
+|    |    |    |    (is standing on egg) 
+|    |    |    |    [pick up egg]
+|    |    |    ->
+|    |    |    |    (is standing on platform) 
 |    |    |    |    ?
 |    |    |    |    |    ->
-|    |    |    |    |    |    (Mario is flying outside of view)
-|    |    |    |    |    |    [Jump off egg to the right]
+|    |    |    |    |    |    (close to the left edge and egg is near)
+|    |    |    |    |    |    [Jump off to the left]
 |    |    |    |    |    ->
-|    |    |    |    |    |    (random)
-|    |    |    |    |    |    [Jump off egg at random direction]
+|    |    |    |    |    |    (close to the right edge and possible to jump down)
+|    |    |    |    |    |    [Jump off to the right]
 |    |    |    |    |    ->
-|    |    |    |    |    |    (random)
-|    |    |    |    |    |    [Pick up egg]
-|    |    |    |    |    ->
-|    |    |    |    |    |    (random)
-|    |    |    |    |    |    [Walk off egg at random direction]
+|    |    |    |    |    |    (else)
+|    |    |    |    |    |    [randomly walk at some direction or stand idle for x frames]
 |    |    |    ->   (dragon is to close)
 |    |    |    |    [Avoid dragon]
 |    |    |    ->
@@ -71,6 +65,14 @@
 |    |    |    |    |    ->
 |    |    |    |    |    |    (random)
 |    |    |    |    |    |    [Jump onto egg]
+|    |    |    ->
+|    |    |    |    (Platform is close) 
+|    |    |    |    ?
+|    |    |    |    |    -> (random)
+|    |    |    |    |    |    [jump onto platform]
+|    |    |    |    |    ->
+|    |    |    |    |    |    (random)
+|    |    |    |    |    |    [ignore]
 |    |    |    ->
 |    |    |    |    (Egg is not close) 
 |    |    |    |    ?
@@ -82,6 +84,3 @@
 |    |    |    |    |    ->
 |    |    |    |    |    |    (random)
 |    |    |    |    |    |    [Walk towards egg]
-|    
-|    
-

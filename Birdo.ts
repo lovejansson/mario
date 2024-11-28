@@ -27,6 +27,7 @@ class BirdoIntroState implements BirdoState {
 
     update(birdo: Birdo, _: number) {
 
+
         if (!this.hasPlayedAudio) {
             AudioPlayer.getInstance().playAudio("birdo-intro");
             this.hasPlayedAudio = true;
@@ -148,8 +149,6 @@ class BirdoWalkingState implements BirdoState {
             }
         }
 
-
-
     }
 
 };
@@ -258,6 +257,8 @@ class BirdoDyingState implements BirdoState {
 
     update(birdo: Birdo, _: number) {
 
+
+
         birdo.asset = this.getAsset();
 
         const vi = 0;
@@ -277,10 +278,7 @@ class BirdoDyingState implements BirdoState {
             birdo.vel.y = 0;
             birdo.vel.x = 0;
 
-            setGameState(GameState.FIGHTING);
-
-            birdo.state = new BirdoIdleState()
-            birdo.lives = 5;
+            setGameState(GameState.PAUSE);
             // Keep falling out of screen
         } else {
             birdo.vel.x = 1;
@@ -304,10 +302,6 @@ class BirdoWinningState implements BirdoState {
 
         birdo.asset = this.getAsset(birdo);
 
-        if (gameState === GameState.FIGHTING) {
-
-            birdo.state = new BirdoIdleState();
-        }
     }
 
     private getAsset(_: Birdo) {
@@ -365,6 +359,7 @@ export class Birdo implements GameObject {
     pos: Point;
     vel: Point;
     lives: number;
+    type: string;
 
     state: BirdoState;
     asset: HTMLImageElement | null;
@@ -375,6 +370,7 @@ export class Birdo implements GameObject {
         this.state = new BirdoIdleState();
         this.asset = null;
         this.id = "birdo";
+        this.type = "birdo";
         this.lives = 5;
     }
 
@@ -403,29 +399,43 @@ export class Birdo implements GameObject {
 
     update(elapsedMillis: number, collisions: Collision[]) {
 
-        if (gameState === GameState.FIGHTING) {
-            // Check if birdo died
-            if (this.lives === 0) {
-                this.state = new BirdoDyingState();
-                setGameState(GameState.MARIO_WON);
-            } else {
-                this.checkCollisions(collisions, elapsedMillis);
-            }
+        switch (gameState) {
+            case GameState.FIGHTING:
+                // Check if birdo died
+                if (this.lives === 0) {
+                    this.state = new BirdoDyingState();
+                    setGameState(GameState.MARIO_WON);
+                } else {
+                    this.checkCollisions(collisions, elapsedMillis);
+                }
+                break;
+            case GameState.MARIO_WON:
+                if (!(this.state instanceof BirdoDyingState)) {
+                    this.state = new BirdoDyingState();
+                }
+                break;
+            case GameState.BIRDO_WON:
+                if (!(this.state instanceof BirdoWinningState)) {
+                    this.state = new BirdoWinningState();
+                    this.pos.y = START_POS.y;
+                }
 
-        } else if (gameState === GameState.BIRDO_WON && !(this.state instanceof BirdoWinningState)) {
-            this.state = new BirdoWinningState();
-            this.pos.y = START_POS.y;
-        }
-        else if (gameState === GameState.INTRO) {
-            if (!(this.state instanceof BirdoIntroState)) {
-                this.state = new BirdoIntroState();
-            }
-
-        } else if (gameState === GameState.PAUSE) {
-            this.state = new BirdoIdleState();
-
-            this.pos.x = START_POS.x;
-            this.pos.y = START_POS.y;
+                break;
+            case GameState.INTRO:
+                if (!(this.state instanceof BirdoIntroState)) {
+                    this.lives = 3;
+                    this.state = new BirdoIntroState();
+                    this.pos.x = START_POS.x;
+                    this.pos.y = START_POS.y;
+                }
+                break;
+            case GameState.PAUSE:
+                if (!(this.state instanceof BirdoIdleState)) {
+                    this.state = new BirdoIdleState();
+                    this.pos.x = START_POS.x;
+                    this.pos.y = START_POS.y;
+                }
+                break;
         }
 
         this.state.update(this, elapsedMillis);

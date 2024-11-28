@@ -1,5 +1,5 @@
 import AssetManager from "./AssetManager";
-import { Mario } from "./Mario";
+import { Mario } from "./mario/Mario";
 import { GameObject, Collision, CollisionBox, Point } from "./types";
 
 
@@ -16,6 +16,7 @@ export class Egg implements GameObject {
     id: string;
     pos: Point;
     vel: Point;
+    type: string;
 
     private frame: number;
     state: EggState;
@@ -27,6 +28,7 @@ export class Egg implements GameObject {
         this.frame = 0;
         this.id = "egg" + Date.now().toString();
         this.state = EggState.FLYING;
+        this.type = "egg";
     }
 
     init() {
@@ -54,9 +56,9 @@ export class Egg implements GameObject {
     }
 
     // Starts a throw of the egg from current position at 
-    throw(dir: "right" | "left") {
+    throw(velX: number) {
         this.state = EggState.THROWED;
-        this.vel.x = dir === "right" ? 8 : -8;
+        this.vel.x = velX;
         this.frame = 0;
     }
 
@@ -66,6 +68,7 @@ export class Egg implements GameObject {
     }
 
     update(_: number, collisions: Collision[]) {
+
         switch (this.state) {
             // Mario is currently picking up the egg
             case EggState.PICKED:
@@ -104,9 +107,10 @@ export class Egg implements GameObject {
                 break;
             case EggState.THROWED:
                 {
-                    const dragonCollision = collisions.find(c => c.obj.id === "dragon");
+                    const dragonCollision = collisions.find(c => c.obj.id === "birdo");
 
                     if (dragonCollision !== undefined) {
+
 
                         this.state = EggState.COLLIDED;
                         this.vel.x = dragonCollision.collisionPoint === "east" ? -2 : 2;

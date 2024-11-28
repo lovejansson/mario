@@ -1,6 +1,6 @@
 import AssetManager from "./AssetManager";
 import { gameObjects, gameState, isDebugMode, reassignGameObjects, setGameState } from "./globalState";
-import { Mario } from "./Mario";
+import { Mario } from "./mario/Mario";
 import { Birdo } from "./Birdo";
 import { GameObject, Collision, GameState } from "./types";
 import { Platform } from "./Platform";
@@ -123,12 +123,12 @@ function updateBackgroundMusic() {
                 audioHandler.stopAudio("bg-mario-died");
                 break;
             case GameState.MARIO_WON:
-                audioHandler.playAudio("bg-mario-won", true);
+                audioHandler.playAudio("bg-mario-won");
                 audioHandler.stopAudio("bg-fighting");
                 audioHandler.stopAudio("bg-mario-died");
                 break;
             case GameState.BIRDO_WON:
-                audioHandler.playAudio("bg-mario-died", true);
+                audioHandler.playAudio("bg-mario-died");
                 audioHandler.stopAudio("bg-mario-won");
                 audioHandler.stopAudio("bg-fighting");
                 break;

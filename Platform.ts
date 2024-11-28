@@ -6,11 +6,13 @@ export class Platform implements GameObject {
     id: string;
     pos: Point;
     vel: Point;
+    type: string;
 
     constructor() {
         this.pos = { x: Math.floor(320 / 2 - 85 / 2), y: 50 };
         this.vel = { x: 0, y: 0 };
         this.id = "platform";
+        this.type = "platform"
     }
 
     getCollisionBox() {
