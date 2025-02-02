@@ -18,97 +18,97 @@ export class Preloader extends Scene {
         //  Load all the assets 
 
         // General 
-        this.load.audio("bg-fighting", "/assets/audio/boss-fighting.ogg");
-        this.load.audio("mario-won", "/assets/audio/mario-won.ogg");
-        this.load.audio("birdo-won", "/assets/audio/mario-died.ogg");
+        this.load.audio("bg-fighting", "/audio/boss-fighting.ogg");
+        this.load.audio("mario-won", "/audio/mario-won.ogg");
+        this.load.audio("birdo-won", "/audio/mario-died.ogg");
 
-        this.load.image("heart", "/assets/images/heart.png");
-        this.load.image("background", "/assets/images/background.png");
-        this.load.image("egg", "/assets/images/egg.png");
-        this.load.image("platform", "/assets/images/platform.png");
-        this.load.image("platform-big", "/assets/images/platform-big.png");
+        this.load.image("heart", "/images/heart.png");
+        this.load.image("background", "/images/background.png");
+        this.load.image("egg", "/images/egg.png");
+        this.load.image("platform", "/images/platform.png");
+        this.load.image("platform-big", "/images/platform-big.png");
 
-        this.load.image("carrot-orange", "/assets/images/carrot-orange.png");
-        this.load.image("carrot-white", "/assets/images/carrot-white.png");
-        this.load.image("carrot-grounded", "/assets/images/carrot-ground.png");
-        this.load.image("palmtree1", "/assets/images/palmtree1.png");
-        this.load.image("palmtree2", "/assets/images/palmtree2.png");
+        this.load.image("carrot-orange", "/images/carrot-orange.png");
+        this.load.image("carrot-white", "/images/carrot-white.png");
+        this.load.image("carrot-grounded", "/images/carrot-ground.png");
+        this.load.image("palmtree1", "/images/palmtree1.png");
+        this.load.image("palmtree2", "/images/palmtree2.png");
 
         // Mario images
-        this.load.spritesheet('mario-walk', 'assets/images/mario-walk.png', {
+        this.load.spritesheet('mario-walk', '/images/mario-walk.png', {
             frameWidth: 32,
             frameHeight: 32,
         });
 
-        this.load.spritesheet('mario-walk-hurting', 'assets/images/mario-walk-hurting.png', {
+        this.load.spritesheet('mario-walk-hurting', '/images/mario-walk-hurting.png', {
             frameWidth: 32,
             frameHeight: 32,
         });
 
 
-        this.load.spritesheet('mario-walk-holding', 'assets/images/mario-walk-holding.png', {
+        this.load.spritesheet('mario-walk-holding', '/images/mario-walk-holding.png', {
             frameWidth: 32,
             frameHeight: 48,
         });
 
-        this.load.spritesheet('mario-walk-holding-hurting', 'assets/images/mario-walk-holding-hurting.png', {
+        this.load.spritesheet('mario-walk-holding-hurting', '/images/mario-walk-holding-hurting.png', {
             frameWidth: 32,
             frameHeight: 48,
         });
 
-        this.load.image("mario-pick", "/assets/images/mario-pick.png");
-        this.load.image("mario-pick-hurting", "/assets/images/mario-pick-hurting.png");
-        this.load.image("mario-duck", "/assets/images/mario-duck.png");
-        this.load.image("mario-throw", "/assets/images/mario-throw.png");
-        this.load.image("mario-win", "/assets/images/mario-win.png");
-        this.load.image("mario-dead", "/assets/images/mario-dead.png");
+        this.load.image("mario-pick", "/images/mario-pick.png");
+        this.load.image("mario-pick-hurting", "/images/mario-pick-hurting.png");
+        this.load.image("mario-duck", "/images/mario-duck.png");
+        this.load.image("mario-throw", "/images/mario-throw.png");
+        this.load.image("mario-win", "/images/mario-win.png");
+        this.load.image("mario-dead", "/images/mario-dead.png");
 
 
         // Mario Sounds
-        this.load.audio("mario-throw", "/assets/audio/mario-throw.ogg");
-        this.load.audio("mario-picking", "/assets/audio/mario-picking.ogg");
-        this.load.audio("mario-picked", "/assets/audio/mario-picked.ogg");
-        this.load.audio("mario-ouch", "/assets/audio/mario-ouch.ogg");
-        this.load.audio("mario-jump", "/assets/audio/mario-jump.ogg");
+        this.load.audio("mario-throw", "/audio/mario-throw.ogg");
+        this.load.audio("mario-picking", "/audio/mario-picking.ogg");
+        this.load.audio("mario-picked", "/audio/mario-picked.ogg");
+        this.load.audio("mario-ouch", "/audio/mario-ouch.ogg");
+        this.load.audio("mario-jump", "/audio/mario-jump.ogg");
 
 
         // Birdo images
 
-        this.load.spritesheet('birdo-walk', 'assets/images/birdo-walk.png', {
+        this.load.spritesheet('birdo-walk', '/images/birdo-walk.png', {
             frameWidth: 27,
             frameHeight: 46,
         });
 
-        this.load.spritesheet('birdo-shoot', 'assets/images/birdo-shoot.png', {
+        this.load.spritesheet('birdo-shoot', '/images/birdo-shoot.png', {
             frameWidth: 27,
             frameHeight: 46,
         });
-        this.load.spritesheet('birdo-idle', 'assets/images/birdo-idle.png', {
-            frameWidth: 27,
-            frameHeight: 46,
-        });
-
-        this.load.spritesheet('birdo-walk-hurting', 'assets/images/birdo-walk-hurting.png', {
+        this.load.spritesheet('birdo-idle', '/images/birdo-idle.png', {
             frameWidth: 27,
             frameHeight: 46,
         });
 
-        this.load.spritesheet('birdo-shoot-hurting', 'assets/images/birdo-shoot-hurting.png', {
-            frameWidth: 27,
-            frameHeight: 46,
-        });
-        this.load.spritesheet('birdo-idle-hurting', 'assets/images/birdo-idle-hurting.png', {
+        this.load.spritesheet('birdo-walk-hurting', '/images/birdo-walk-hurting.png', {
             frameWidth: 27,
             frameHeight: 46,
         });
 
-        this.load.image("birdo-platform", "/assets/images/birdo-platform.png")
+        this.load.spritesheet('birdo-shoot-hurting', '/images/birdo-shoot-hurting.png', {
+            frameWidth: 27,
+            frameHeight: 46,
+        });
+        this.load.spritesheet('birdo-idle-hurting', '/images/birdo-idle-hurting.png', {
+            frameWidth: 27,
+            frameHeight: 46,
+        });
+
+        this.load.image("birdo-platform", "/images/birdo-platform.png")
 
         // Birdo sounds
 
-        this.load.audio("birdo-shoot-egg", "/assets/audio/birdo-shoot-egg.ogg");
-        this.load.audio("birdo-hurting", "/assets/audio/birdo-hurt.ogg");
-        this.load.audio("birdo-intro", "/assets/audio/birdo-intro.ogg");
+        this.load.audio("birdo-shoot-egg", "/audio/birdo-shoot-egg.ogg");
+        this.load.audio("birdo-hurting", "/audio/birdo-hurt.ogg");
+        this.load.audio("birdo-intro", "/audio/birdo-intro.ogg");
 
     }
 
