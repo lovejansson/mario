@@ -113,7 +113,6 @@ export class Carrot extends Phaser.Physics.Arcade.Sprite {
 
     private isOutSideOfWorld(): boolean {
         const worldBounds = this.scene.physics.world.bounds;
-
         return this.dynamicBody.right <= worldBounds.left || this.dynamicBody.top >= worldBounds.bottom || this.dynamicBody.left >= worldBounds.right;
     }
 

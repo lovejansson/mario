@@ -1,4 +1,4 @@
-import Phaser, { Scene, Types } from 'phaser';
+import { Scene, Types } from 'phaser';
 import { Mario } from '../mario/Mario';
 import { Birdo, BIRDO_HEIGHT, BIRDO_WIDTH } from '../Birdo';
 import { Egg } from '../Egg';

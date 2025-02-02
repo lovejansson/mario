@@ -2,7 +2,6 @@
 
 
 import { Game, Types } from "phaser";
-
 import { MainMenu } from "./scenes/MainMenu";
 import { Fighting } from "./scenes/Fighting";
 import { Preloader } from "./scenes/Preloader";

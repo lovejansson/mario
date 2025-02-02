@@ -5,6 +5,7 @@ import { Display, Scene } from 'phaser';
  * The smaller the file sizes here, the better. 
  */
 export class Boot extends Scene {
+
     constructor() {
         super('Boot');
     }
@@ -14,7 +15,7 @@ export class Boot extends Scene {
     }
 
     preload() {
-        this.load.image("start-screen", "/assets/images/start-screen.png");
+        this.load.image("start-screen", "/images/start-screen.png");
     }
 
     create() {
