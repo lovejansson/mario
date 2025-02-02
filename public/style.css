@@ -1,8 +1,16 @@
+body {
+    width: 100% !important;
+    height: auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
 
-#container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    width: 100%;
+html {
+    width: 100% !important;
+    height: auto !important;
+    margin: 0 !important;
+}
+
+canvas {
+    margin-top: 0px !important;
 }

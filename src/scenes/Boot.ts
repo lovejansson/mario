@@ -1,5 +1,9 @@
 import { Display, Scene } from 'phaser';
 
+
+const baseUrl = import.meta.env.BASE_URL;
+
+
 /**
  * Boot scene is used for loading assets needed for the Preloader Scene. 
  * The smaller the file sizes here, the better. 
@@ -15,7 +19,7 @@ export class Boot extends Scene {
     }
 
     preload() {
-        this.load.image("start-screen", "/images/start-screen.png");
+        this.load.image("start-screen", `${baseUrl}images/start-screen.png`);
     }
 
     create() {
