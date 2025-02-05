@@ -13,4 +13,6 @@ html {
 
 canvas {
     margin-top: 0px !important;
+    width: 100%;
 }
+
