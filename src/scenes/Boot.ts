@@ -15,14 +15,22 @@ export class Boot extends Scene {
     }
 
     init() {
-        this.add.rectangle(0, 0, 320, 180, Display.Color.GetColor(255, 255, 255), 1)
+        const canvas = document.querySelector('canvas');
+
+        if (canvas !== null) {
+            canvas.style.opacity = "0";
+        }
+
     }
 
     preload() {
         this.load.image("start-screen", `${baseUrl}images/start-screen.png`);
+
+
     }
 
     create() {
+
         this.scene.start('Preloader');
     }
 }

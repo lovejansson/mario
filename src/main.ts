@@ -14,11 +14,9 @@ const config: Types.Core.GameConfig = {
     type: Phaser.AUTO,
     width: 320,
     height: 180,
-    backgroundColor: '#028af8',
+    backgroundColor: 'transparent',
     pixelArt: true,
-
     physics: {
-
         default: 'arcade',
         arcade: {
             gravity: { y: 1000, x: 0 },

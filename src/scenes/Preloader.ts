@@ -10,8 +10,12 @@ export class Preloader extends Scene {
 
     init() {
         //  We loaded this image in our Boot Scene, so we can display it here
-        const background = this.add.image(0, 0, 'start-screen');
-        background.setOrigin(0, 0);
+        this.add.image(0, 0, 'start-screen').setOrigin(0);
+        const canvas = document.querySelector('canvas');
+
+        if (canvas !== null) {
+            canvas.style.opacity = "1";
+        }
     }
 
 
