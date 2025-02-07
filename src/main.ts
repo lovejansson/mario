@@ -14,7 +14,6 @@ const config: Types.Core.GameConfig = {
     type: Phaser.AUTO,
     width: 320,
     height: 180,
-    backgroundColor: 'transparent',
     pixelArt: true,
     physics: {
         default: 'arcade',
@@ -25,7 +24,6 @@ const config: Types.Core.GameConfig = {
     },
     scale: {
         mode: Phaser.Scale.FIT,
-        autoCenter: Phaser.Scale.CENTER_BOTH
     },
     scene: [
         Boot,

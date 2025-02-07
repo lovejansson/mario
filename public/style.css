@@ -1,18 +1,14 @@
-body {
+
+
+html, body {
     width: 100% !important;
-    height: auto !important;
+    height: 100% !important;
     margin: 0 !important;
     padding: 0 !important;
 }
 
-html {
-    width: 100% !important;
-    height: auto !important;
-    margin: 0 !important;
-}
-
 canvas {
     margin-top: 0px !important;
-    width: 100%;
+    width: 100% !important;
 }
 
