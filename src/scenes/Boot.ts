@@ -25,8 +25,6 @@ export class Boot extends Scene {
 
     preload() {
         this.load.image("start-screen", `${baseUrl}images/start-screen.png`);
-
-
     }
 
     create() {
