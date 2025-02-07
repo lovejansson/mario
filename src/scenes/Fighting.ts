@@ -48,7 +48,9 @@ export class Fighting extends Scene {
 
         this.state = FightingState.INTRO;
 
-        this.input.once('pointerdown', () => {
+        const canvas = document.querySelector("canvas");
+
+        canvas?.addEventListener("click", () => {
             this.scene.start('MainMenu');
         });
 
