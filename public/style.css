@@ -5,13 +5,11 @@ html, body {
     height: 100% !important;
     margin: 0 !important;
     padding: 0 !important;
-
 }
 
 canvas {
     margin-top: 0px !important;
     width: 100% !important;
     cursor: pointer!important;
-
 }
 
