@@ -36,9 +36,14 @@ export class Fighting extends Scene {
 
     private canvasClicked!: boolean;
 
+    private canvasClickListener: () => void;
+
 
     constructor() {
         super('Fighting');
+        this.canvasClickListener = () => {
+            this.canvasClicked = true;
+        };
     }
 
 
@@ -49,14 +54,13 @@ export class Fighting extends Scene {
     }
 
     create() {
-        console.log("CREATE FIGHTING", this.canvasClicked)
+        console.log("CREATE FIGHTING", this.canvasClicked);
+
         const canvas = document.querySelector("canvas");
 
         if (canvas === null) throw new Error("No canvas");
 
-        canvas.addEventListener("click", () => {
-            this.canvasClicked = true;
-        });
+        canvas.addEventListener("click", this.canvasClickListener);
 
         this.add.image(0, 0, 'background').setOrigin(0);
 
@@ -68,6 +72,7 @@ export class Fighting extends Scene {
 
         this.events.on('shutdown', () => {
             this.sound.removeAll();
+            canvas.removeEventListener("click", this.canvasClickListener);
         });
 
         // Creating all objects and groups in the scene 

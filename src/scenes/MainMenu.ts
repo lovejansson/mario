@@ -4,8 +4,14 @@ export class MainMenu extends Scene {
 
     canvasClicked!: boolean;
 
+    private canvasClickListener: () => void;
+
+
     constructor() {
         super('MainMenu');
+        this.canvasClickListener = () => {
+            this.canvasClicked = true;
+        };
     }
 
     init() {
@@ -22,8 +28,11 @@ export class MainMenu extends Scene {
 
         if (canvas === null) throw new Error("No canvas");
 
-        canvas.addEventListener("click", () => {
-            this.canvasClicked = true;
+        canvas.addEventListener("click", this.canvasClickListener);
+
+        this.events.on('shutdown', () => {
+            this.sound.removeAll();
+            canvas.removeEventListener("click", this.canvasClickListener);
         });
 
 
