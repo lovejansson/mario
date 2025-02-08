@@ -11,6 +11,13 @@ html, body {
     height: 100% !important;
 }
 
+body  {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
 canvas {
     cursor: pointer !important;
     width: 100% !important;
