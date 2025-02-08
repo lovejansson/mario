@@ -43,12 +43,13 @@ export class Fighting extends Scene {
 
 
     init() {
+        console.log("UPDATE FIGHTING", this.canvasClicked)
         this.canvasClicked = false;
         this.state = FightingState.INTRO;
     }
 
     create() {
-
+        console.log("CREATE FIGHTING", this.canvasClicked)
         const canvas = document.querySelector("canvas");
 
         if (canvas === null) throw new Error("No canvas");
@@ -125,8 +126,9 @@ export class Fighting extends Scene {
 
 
     update(_: number, __: number): void {
-
+        console.log("UPDATE FIGHTING", this.canvasClicked)
         if (this.canvasClicked) {
+            console.log("STARTING MAIN", this.canvasClicked)
             this.scene.start('MainMenu');
             return;
         }

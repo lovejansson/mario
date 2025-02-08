@@ -205,7 +205,7 @@ export class Birdo extends Phaser.Physics.Arcade.Sprite {
                 this.anims.play("idle");
 
                 if (!this.soundIntro.isPlaying) {
-
+                    console.log("BIRDO INTRO SOUND")
                     this.soundIntro.play();
 
                     this.soundIntro.on("complete", () => {
