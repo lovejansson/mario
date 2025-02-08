@@ -51,7 +51,6 @@ export class Fighting extends Scene {
         const canvas = document.querySelector("canvas");
 
         canvas?.addEventListener("click", () => {
-            this.sound.destroy();
             this.scene.start('MainMenu');
         });
 
@@ -64,8 +63,7 @@ export class Fighting extends Scene {
         this.sound.add("bg-fighting");
 
         this.events.on('shutdown', () => {
-            if (this.sound.get("bg-fighting").isPlaying)
-                this.sound.get("bg-fighting").stop();
+            this.sound.removeAll();
         });
 
         // Creating all objects and groups in the scene 
