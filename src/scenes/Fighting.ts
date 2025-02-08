@@ -71,7 +71,7 @@ export class Fighting extends Scene {
         this.sound.add("bg-fighting");
 
         this.events.on('shutdown', () => {
-            this.sound.setMute(true);
+
             canvas.removeEventListener("click", this.canvasClickListener);
         });
 

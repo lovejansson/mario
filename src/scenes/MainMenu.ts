@@ -31,9 +31,6 @@ export class MainMenu extends Scene {
         canvas.addEventListener("click", this.canvasClickListener);
 
         this.events.on('shutdown', () => {
-
-
-            this.sound.setMute(true);
             canvas.removeEventListener("click", this.canvasClickListener);
         });
 
