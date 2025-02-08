@@ -51,6 +51,7 @@ export class Fighting extends Scene {
         const canvas = document.querySelector("canvas");
 
         canvas?.addEventListener("click", () => {
+            this.sound.destroy();
             this.scene.start('MainMenu');
         });
 
