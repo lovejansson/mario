@@ -74,7 +74,6 @@ export class Egg extends Phaser.Physics.Arcade.Sprite {
     }
 
     handleCollision(_: any) {
-        console.log("EGG COLLIDING")
 
         if ([EggState.FLYING, EggState.THROWED].includes(this.state)) {
             this.state = EggState.COLLIDED;

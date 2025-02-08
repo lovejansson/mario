@@ -34,24 +34,25 @@ export class Fighting extends Scene {
 
     state!: FightingState;
 
+    private canvasClicked!: boolean;
+
 
     constructor() {
         super('Fighting');
     }
 
 
-    init() {
-
-    }
-
     create() {
 
+        this.canvasClicked = false;
         this.state = FightingState.INTRO;
 
         const canvas = document.querySelector("canvas");
 
-        canvas?.addEventListener("click", () => {
-            this.scene.start('MainMenu');
+        if (canvas === null) throw new Error("No canvas");
+
+        canvas.addEventListener("click", () => {
+            this.canvasClicked = true;
         });
 
         this.add.image(0, 0, 'background').setOrigin(0);
@@ -122,6 +123,11 @@ export class Fighting extends Scene {
 
 
     update(_: number, __: number): void {
+
+        if (this.canvasClicked) {
+            this.scene.start('MainMenu');
+            return;
+        }
 
         if (this.state === FightingState.FIGHTING) {
             if (!this.sound.get("bg-fighting").isPlaying)
