@@ -8,8 +8,11 @@ export class MainMenu extends Scene {
         super('MainMenu');
     }
 
-    create() {
+    init() {
         this.canvasClicked = false;
+    }
+
+    create() {
         //  We loaded this image in our Boot Scene, so we can display it here
         this.add.image(0, 0, 'start-screen').setOrigin(0);
 

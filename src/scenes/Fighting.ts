@@ -42,10 +42,12 @@ export class Fighting extends Scene {
     }
 
 
-    create() {
-
+    init() {
         this.canvasClicked = false;
         this.state = FightingState.INTRO;
+    }
+
+    create() {
 
         const canvas = document.querySelector("canvas");
 
