@@ -15,12 +15,10 @@ export class MainMenu extends Scene {
     }
 
     init() {
-        console.log("INIT MAIN", this.canvasClicked)
         this.canvasClicked = false;
     }
 
     create() {
-        console.log("CREATE MAIN", this.canvasClicked)
         //  We loaded this image in our Boot Scene, so we can display it here
         this.add.image(0, 0, 'start-screen').setOrigin(0);
 
@@ -38,9 +36,7 @@ export class MainMenu extends Scene {
     }
 
     update() {
-        console.log("UPDATE MAIN", this.canvasClicked)
         if (this.canvasClicked) {
-            console.log("STARTING FIGHTING", this.canvasClicked)
             this.scene.start('Fighting');
         }
     }
