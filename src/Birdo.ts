@@ -207,7 +207,6 @@ export class Birdo extends Phaser.Physics.Arcade.Sprite {
                 if (!this.soundIntro.isPlaying) {
 
                     this.soundIntro.play();
-
                     this.soundIntro.on("complete", () => {
                         this.fightingScene.state = FightingState.FIGHTING;
                     });
