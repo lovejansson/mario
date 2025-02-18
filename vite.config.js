@@ -6,7 +6,7 @@ export default defineConfig(({ command, mode }) => {
     const env = loadEnv(mode, process.cwd(), '');
 
     return {
-        base: env.NODE_ENV === "production" ? "/mario/dist/" : "/"
+        base: env.NODE_ENV === "production" ? "/mario/" : "/"
 
     }
 })
