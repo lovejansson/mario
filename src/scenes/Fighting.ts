@@ -34,30 +34,30 @@ export class Fighting extends Scene {
 
     state!: FightingState;
 
-    private canvasClicked!: boolean;
+    private appClicked!: boolean;
 
-    private canvasClickListener: () => void;
+    private appClickListener: () => void;
 
 
     constructor() {
         super('Fighting');
-        this.canvasClickListener = () => {
-            this.canvasClicked = true;
+        this.appClickListener = () => {
+            this.appClicked = true;
         };
     }
 
 
     init() {
-        this.canvasClicked = false;
+        this.appClicked = false;
         this.state = FightingState.INTRO;
     }
 
     create() {
-        const canvas = document.querySelector("canvas");
+        const app = document.querySelector("#app");
 
-        if (canvas === null) throw new Error("No canvas");
+        if (app === null) throw new Error("No app");
 
-        canvas.addEventListener("click", this.canvasClickListener);
+        app.addEventListener("click", this.appClickListener);
 
         this.add.image(0, 0, 'background').setOrigin(0);
 
@@ -68,7 +68,7 @@ export class Fighting extends Scene {
         this.sound.add("bg-fighting");
 
         this.events.on('shutdown', () => {
-            canvas.removeEventListener("click", this.canvasClickListener);
+            app.removeEventListener("click", this.appClickListener);
             this.sound.stopAll();
         });
 
@@ -128,7 +128,7 @@ export class Fighting extends Scene {
 
 
     update(_: number, __: number): void {
-        if (this.canvasClicked) {
+        if (this.appClicked) {
             this.scene.start('MainMenu');
             return;
         }

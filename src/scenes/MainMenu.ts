@@ -2,41 +2,41 @@ import { Scene } from 'phaser';
 
 export class MainMenu extends Scene {
 
-    canvasClicked!: boolean;
+    appClicked!: boolean;
 
-    private canvasClickListener: () => void;
+    private appClickListener: () => void;
 
 
     constructor() {
         super('MainMenu');
-        this.canvasClickListener = () => {
-            this.canvasClicked = true;
+        this.appClickListener = () => {
+            this.appClicked = true;
         };
     }
 
     init() {
-        this.canvasClicked = false;
+        this.appClicked = false;
     }
 
     create() {
         //  We loaded this image in our Boot Scene, so we can display it here
         this.add.image(0, 0, 'start-screen').setOrigin(0);
 
-        const canvas = document.querySelector("canvas");
+        const app = document.querySelector("#app");
 
-        if (canvas === null) throw new Error("No canvas");
+        if (app === null) throw new Error("No app");
 
-        canvas.addEventListener("click", this.canvasClickListener);
+        app.addEventListener("click", this.appClickListener);
 
         this.events.on('shutdown', () => {
-            canvas.removeEventListener("click", this.canvasClickListener);
+            app.removeEventListener("click", this.appClickListener);
         });
 
 
     }
 
     update() {
-        if (this.canvasClicked) {
+        if (this.appClicked) {
             this.scene.start('Fighting');
         }
     }

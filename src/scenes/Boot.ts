@@ -1,5 +1,4 @@
-import { Display, Scene } from 'phaser';
-
+import {  Scene } from 'phaser';
 
 const baseUrl = import.meta.env.BASE_URL;
 
@@ -20,11 +19,10 @@ export class Boot extends Scene {
         if (canvas !== null) {
             canvas.style.opacity = "0";
         }
-
     }
 
     preload() {
-        this.load.image("start-screen", `${baseUrl}images/start-screen.png`);
+        this.load.image("start-screen", `${baseUrl}images/thumbnail.png`);
     }
 
     create() {

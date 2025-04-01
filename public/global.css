@@ -1,0 +1,26 @@
+
+  
+html, body,#app {
+    width: 100% !important;
+    height: 100% !important;
+}
+
+*  {
+    margin: 0 !important;
+    padding: 0 !important;
+    border: none;
+    background: none;
+    box-sizing: border-box;
+}
+
+canvas {
+    cursor: pointer !important;
+
+    width: 100% !important;
+    height: 100% !important;
+    aspect-ratio: 320/180;    
+    image-rendering: pixelated;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
