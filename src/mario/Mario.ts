@@ -28,7 +28,6 @@ export class Mario extends Phaser.Physics.Arcade.Sprite {
     private fightingScene: Fighting;
 
     constructor(scene: Scene, x: number, y: number, texture: string) {
-
         super(scene, x, y, texture);
 
         // Add the sprite to the scene
@@ -36,7 +35,6 @@ export class Mario extends Phaser.Physics.Arcade.Sprite {
         // Enable physics on this sprite
         scene.physics.add.existing(this);
         this.fightingScene = this.scene as Fighting;
-
 
         this.movement = new MarioIdle("right");
 

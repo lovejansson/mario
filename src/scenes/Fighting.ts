@@ -37,6 +37,7 @@ export class Fighting extends Scene {
     private appClicked!: boolean;
 
     private appClickListener: () => void;
+    private volumeListener: (e: any) => void;
 
 
     constructor() {
@@ -44,6 +45,10 @@ export class Fighting extends Scene {
         this.appClickListener = () => {
             this.appClicked = true;
         };
+
+        this.volumeListener = (e) => {
+            this.sound.setVolume(e.detail.volume / 100);
+        }
     }
 
 
@@ -53,11 +58,13 @@ export class Fighting extends Scene {
     }
 
     create() {
-        const app = document.querySelector("#app");
 
-        if (app === null) throw new Error("No app");
+        const audioPlayerEl = document.querySelector("audio-player");
 
-        app.addEventListener("click", this.appClickListener);
+        if(audioPlayerEl === null) throw new Error("No audio player");
+
+        audioPlayerEl.addEventListener("pause", this.appClickListener);
+        audioPlayerEl.addEventListener("volume", this.volumeListener);
 
         this.add.image(0, 0, 'background').setOrigin(0);
 
@@ -67,8 +74,10 @@ export class Fighting extends Scene {
         this.platformBirdo.name = "birdo-platform";
         this.sound.add("bg-fighting");
 
+
         this.events.on('shutdown', () => {
-            app.removeEventListener("click", this.appClickListener);
+            audioPlayerEl.removeEventListener("pause", this.appClickListener);
+            audioPlayerEl.removeEventListener("volume", this.volumeListener);
             this.sound.stopAll();
         });
 

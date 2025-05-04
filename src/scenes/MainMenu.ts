@@ -22,17 +22,15 @@ export class MainMenu extends Scene {
         //  We loaded this image in our Boot Scene, so we can display it here
         this.add.image(0, 0, 'start-screen').setOrigin(0);
 
-        const app = document.querySelector("#app");
+        const audioPlayerEl = document.querySelector("audio-player");
 
-        if (app === null) throw new Error("No app");
+        if(audioPlayerEl === null) throw new Error("No audio player");
 
-        app.addEventListener("click", this.appClickListener);
+        audioPlayerEl.addEventListener("play", this.appClickListener);
 
         this.events.on('shutdown', () => {
-            app.removeEventListener("click", this.appClickListener);
+            audioPlayerEl.removeEventListener("play", this.appClickListener);
         });
-
-
     }
 
     update() {

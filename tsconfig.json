@@ -22,6 +22,9 @@
         "resolveJsonModule": true, // Allow importing JSON files as modules
         "allowSyntheticDefaultImports": true // Allow default imports from modules with no default export
     },
+    "allowJs": true,
+    "checkJs": false,
+    "noEmit": true,
     "include": [
         "./"
     ], // Include all files in the src directory
