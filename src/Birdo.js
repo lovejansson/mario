@@ -1,6 +1,7 @@
 import { Carrot } from "./Carrot";
 import { Egg } from "./Egg";
 import { Fighting, FightingState, PLATFORM_BIRDO_POS, PLATFORM_BIRDO_WIDTH } from "./scenes/Fighting";
+import Sprite from "./Sprite";
 
 enum BirdoState {
     WALK_FORWARD,
@@ -10,16 +11,10 @@ enum BirdoState {
     IDLE,
 }
 
-export const BIRDO_WIDTH = 27;
+export class Birdo extends Sprite {
 
-export const BIRDO_HEIGHT = 46;
 
-type PhaserSound = Phaser.Sound.NoAudioSound | Phaser.Sound.HTML5AudioSound | Phaser.Sound.WebAudioSound;
-
-export class Birdo extends Phaser.Physics.Arcade.Sprite {
-
-    private dynamicBody: Phaser.Physics.Arcade.Body;
-    state: BirdoState;
+    state;
     prevState: BirdoState;
 
     private counter: number;
@@ -37,19 +32,14 @@ export class Birdo extends Phaser.Physics.Arcade.Sprite {
 
     private fightingScene: Fighting;
 
-
-    constructor(scene: Fighting, x: number, y: number, texture: string,) {
-        super(scene, x, y, texture);
-
-        // Enable physics on this sprite
-        scene.physics.add.existing(this);
-
-        // Add the sprite to the scene
-        scene.add.existing(this);
-
-        this.dynamicBody = this.body as Phaser.Physics.Arcade.Body;
-
-        this.fightingScene = this.scene as Fighting;
+   /**
+     * @param {Scene} scene
+     * @param {{ x: number, y: number }} pos
+     * @param {number} width
+     * @param {number} height
+     */
+    constructor(scene, pos, width, height) {
+        super(scene, pos, width, height);
 
         this.state = BirdoState.WALK_FORWARD;
         this.prevState = BirdoState.WALK_FORWARD
@@ -61,20 +51,6 @@ export class Birdo extends Phaser.Physics.Arcade.Sprite {
         this.isHurtingCounter = 0;
         this.hasShootEgg = false;
         this.hasJumped = false;
-
-
-        // Set body properties
-
-        // So that birdo will not gain any velocity when getting hit by carrots or eggs
-        this.setPushable(false); // Sets birdo to be non pushable 
-        this.dynamicBody.setSlideFactor(0, 0)
-
-        this.setSize(BIRDO_WIDTH, BIRDO_HEIGHT);
-        this.setOrigin(0);
-
-        this.refreshBody();
-
-        // Create animations
 
         this.anims.create({
             key: 'walk',

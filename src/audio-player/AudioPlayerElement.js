@@ -8,7 +8,7 @@ const DEFAULT_VOLUME = 20;
 const VOLUME_STEP = 20;
 const DEBUG = true;
 
-export default class AudioPlayer extends HTMLElement {
+export default class AudioPlayerElement extends HTMLElement {
   
     /**
      * @type {HTMLDivElement}
@@ -171,4 +171,4 @@ export default class AudioPlayer extends HTMLElement {
 
 }
 
-customElements.define("audio-player", AudioPlayer);
+customElements.define("audio-player", AudioPlayerElement);
