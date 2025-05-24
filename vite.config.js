@@ -6,9 +6,9 @@ export default defineConfig(({ command, mode }) => {
     const env = loadEnv(mode, process.cwd(), '');
 
     return {
-        base: env.NODE_ENV === "production" ? "/mario/" : "/",
+        base: env.NODE_ENV === "production" ? "/art/mario/" : "/",
         optimizeDeps: {
-            include: ["./src/music-player/MusicPlayer.js"]
+            include: ["./src/audio-player/AudioPlayer.js"]
         }
     }
 })
