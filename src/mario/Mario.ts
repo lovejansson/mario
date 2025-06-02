@@ -42,7 +42,7 @@ export class Mario extends Phaser.Physics.Arcade.Sprite {
         this.standingOnEgg = new MarioStandingOnEgg(null);
         this.standingAtCarrot = new MarioStandingAtCarrot(null);
 
-        this.lives = 3;
+        this.lives = 5;
         this.livesGroup = scene.add.group([]);
         this.counter = 0;
         this.isHurting = false;
@@ -454,7 +454,7 @@ export class Mario extends Phaser.Physics.Arcade.Sprite {
         switch (this.fightingScene.state) {
             case FightingState.INTRO:
                 this.idle("right");
-                this.lives = 3;
+                this.lives = 5;
                 break;
             case FightingState.FIGHTING:
                 this.updateState(cursors);
