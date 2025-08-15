@@ -1,5 +1,5 @@
 # Mario vs Birdo
-This project is a simulation of a boss fight between Birdo and Mario from the Super Mario Advance Game Boy game which I mastered as a child. Mario will collect carrots and eggs to throw at Birdo while she is trying to egg him down. First one to hit the other one 5 times is the winner! 
+This project is a simulation of a boss fight between Birdo and Mario from the Super Mario Advance Game Boy game. Mario will collect carrots and eggs to throw at Birdo while she is trying to egg him down. First one to hit the other one 5 times is the winner! 
 
 A behavior tree-like if-and-else statement structure is deciding how mario should act, while Birdo is more simple-minded and moves back and forth while shooting eggs.
 
