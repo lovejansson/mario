@@ -6,6 +6,7 @@ export class MainMenu extends Scene {
 
     private appClickListener: () => void;
     private appMessageListener: (e: MessageEvent) => void;
+    private keyDownListener: (e: KeyboardEvent) => void;
 
 
     constructor() {
@@ -17,7 +18,34 @@ export class MainMenu extends Scene {
         this.appMessageListener = (e) => {
           if(e.data.action === "toggle-play-pause"){
             this.shouldStartFighting = true;
+          } else if(e.data.action === "enter-fullscreen") {
+         
+            if(document.fullscreenElement === null) {
+                const app = document.querySelector("#app");
+                if(app) {
+                    app.requestFullscreen();
+                }
+            } else {
+                console.warn("An element is already in full screen: ", document.fullscreenElement);
+            }
           }
+        } 
+
+        this.keyDownListener = (e: KeyboardEvent) => {
+              if (e.key === " " || e.key === "Spacebar") {
+                e.preventDefault();
+                this.shouldStartFighting = true;
+            } else if(e.key === "f" || e.key === "F") {
+                
+                if(document.fullscreenElement === null) {
+                    const app = document.querySelector("#app");
+                    if(app) {
+                        app.requestFullscreen();
+                    }
+                } else {
+                    console.warn("An element is already in full screen: ", document.fullscreenElement);
+                }
+            }
         }
     }
 
@@ -26,6 +54,7 @@ export class MainMenu extends Scene {
     }
 
     create() {
+   
         //  We loaded this image in our Boot Scene, so we can display it here
         this.add.image(0, 0, 'start-screen').setOrigin(0);
 
@@ -35,10 +64,12 @@ export class MainMenu extends Scene {
 
         audioPlayerEl.addEventListener("play", this.appClickListener);
         addEventListener("message", this.appMessageListener);
+        addEventListener("keydown", this.keyDownListener);
 
         this.events.on('shutdown', () => {
             audioPlayerEl.removeEventListener("play", this.appClickListener);
             removeEventListener("message", this.appMessageListener);
+            removeEventListener("keydown", this.keyDownListener);
         });
     }
 

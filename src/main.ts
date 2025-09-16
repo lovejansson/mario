@@ -23,6 +23,10 @@ const config: Types.Core.GameConfig = {
     scale: {
         mode: Phaser.Scale.FIT,
     },
+    input: {
+        keyboard: false,
+
+    },
     scene: [
         Boot,
         Preloader,
