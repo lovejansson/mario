@@ -34,26 +34,32 @@ export class Fighting extends Scene {
 
     state!: FightingState;
 
-    private appClicked!: boolean;
+    private shouldQuitFighting!: boolean;
 
     private appClickListener: () => void;
     private volumeListener: (e: any) => void;
+    private appMessageListener: (e: MessageEvent) => void;
 
 
     constructor() {
         super('Fighting');
         this.appClickListener = () => {
-            this.appClicked = true;
+            this.shouldQuitFighting = true;
         };
+
+        this.appMessageListener = (e) => {
+          if(e.data.action === "toggle-play-pause"){
+            this.shouldQuitFighting = true;
+          }
+        }
 
         this.volumeListener = (e) => {
             this.sound.setVolume(e.detail.volume / 100);
         }
     }
 
-
     init() {
-        this.appClicked = false;
+        this.shouldQuitFighting = false;
         this.state = FightingState.INTRO;
     }
 
@@ -65,6 +71,7 @@ export class Fighting extends Scene {
 
         audioPlayerEl.addEventListener("pause", this.appClickListener);
         audioPlayerEl.addEventListener("volume", this.volumeListener);
+        addEventListener("message", this.appMessageListener);
 
         this.add.image(0, 0, 'background').setOrigin(0);
 
@@ -78,6 +85,7 @@ export class Fighting extends Scene {
         this.events.on('shutdown', () => {
             audioPlayerEl.removeEventListener("pause", this.appClickListener);
             audioPlayerEl.removeEventListener("volume", this.volumeListener);
+            removeEventListener("message", this.appMessageListener);
             this.sound.stopAll();
         });
 
@@ -137,7 +145,7 @@ export class Fighting extends Scene {
 
 
     update(_: number, __: number): void {
-        if (this.appClicked) {
+        if (this.shouldQuitFighting) {
             this.scene.start('MainMenu');
             return;
         }
