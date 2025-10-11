@@ -6,10 +6,11 @@ html, body {
     font-size: 10px;
 }
 
-#app {
-    height: 100%;
-    width: auto;
-    aspect-ratio: 16/9;
+body {
+  background-color: black;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
 *  {
@@ -28,4 +29,20 @@ canvas {
     position: absolute;
     top: 0;
     left: 0;
+}
+
+#app {
+    aspect-ratio: 16 / 9;
+    margin: auto;
+    width: 100%;
+    height: auto;
+}
+
+/* If screen for device has aspect ratio of 16/9 or bigger the height will take up the full height of the screen 
+and the widths will be automatically sized while filled with black */
+@media screen and (min-aspect-ratio: 16/9){
+    #app {
+        width: auto;
+        height: 100%;
+    }
 }
