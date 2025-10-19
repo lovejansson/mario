@@ -10,6 +10,7 @@ body {
   background-color: black;
   display: flex;
   flex-direction: column;
+  justify-content: center;
   overflow: hidden;
 }
 
@@ -31,18 +32,19 @@ canvas {
     left: 0;
 }
 
-#app {
-    aspect-ratio: 16 / 9;
-    margin: auto;
+/*Keeping the app in the middle of the screen at screen height and fills the background with black if screen isn't 16/9*/
+#art-container {
     width: 100%;
     height: auto;
+    aspect-ratio: 16/9;
+    position: relative;
+    margin: auto;
 }
 
-/* If screen for device has aspect ratio of 16/9 or bigger the height will take up the full height of the screen 
-and the widths will be automatically sized while filled with black */
 @media screen and (min-aspect-ratio: 16/9){
-    #app {
-        width: auto;
+    #art-container {
+        width: auto; 
         height: 100%;
+            margin: auto;
     }
 }

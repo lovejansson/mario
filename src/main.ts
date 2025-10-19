@@ -12,7 +12,7 @@ const config: Types.Core.GameConfig = {
     width: 320,
     height: 180,
     pixelArt: true,
-    parent: "app",
+    parent: "art-container",
     backgroundColor: "transparent",
     physics: {
         default: 'arcade',
