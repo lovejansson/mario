@@ -61,7 +61,9 @@ export class Fighting extends Scene {
             } else {
                 console.warn("An element is already in full screen: ", document.fullscreenElement);
             }
-          }
+          } else if(e.data.action === "art-lost-focus") {
+            document.querySelector("body")?.focus();
+        }
         
         }
 
