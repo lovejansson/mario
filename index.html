@@ -13,128 +13,129 @@
 
     </main>
     
-    <audio-player></audio-player>
+    <audio-player tabindex="0"></audio-player>
 
     <script type="module" src="./src/components/audio-player/AudioPlayerElement.js"></script>  
     <script type="module" src="./src/main.ts"></script>
 </body>
 
-<!-- Templates for web components -->
+  <!-- Templates for web components -->
 
-<template id="template-audio-player">
-    
-    <style>
+    <template id="template-audio-player">
+        
+        <style>
 
-        :host {
-            --color: black;
-        }
-       
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: Consolas;
-        }
+            :host {
+                --color: #fefefe;  
+            }
+        
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+         
+            }
 
-        button {
-            cursor: pointer;
-            background: none;
-            border: none;
-            padding: 0;
-            margin: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            outline: none;
-        }
+            button {
+                cursor: pointer;
+                background: none;
+                border: none;
+                padding: 0;
+                margin: 0;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                outline: none;
+            }
 
+           
+            .icon {
+                width: 2.4rem;
+            }
 
-        .icon {
-            width: 2.4rem;
-        }
+            .hidden {
+                display: none;
+            }
 
-        .hidden {
-            display: none;
-        }
+            #player{
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background-color: transparent;
+                cursor: pointer;
+                display: flex;
+                flex-direction: column;
+                justify-content: flex-end;
+          
+            }
 
-        #player{
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: transparent;
-            z-index: 1000;
-            cursor: pointer;
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-end;
-        }
+            #controls {
+                width: 100%;
+                display: flex;
+                display: flex;
+                align-items: center;
+                justify-content: flex-end;
+                opacity: 0;
+                transition: opacity 0.2s ease-in;
+                padding: 1rem;
+                background-color: #121212c9;
+            }
 
-        #player:hover > #player-controls  {
-            opacity: 1;
-        }
+            #player:hover > #controls,  
+            #player.active > #controls {
+                opacity: 1;
+            }
 
-        #player-controls {
-            width: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: flex-start;
-            opacity: 0;
-            transition: opacity 0.2s ease-in;
-            padding: 1rem;
-        }
+            #player:focus {
+                outline: none;
+            }
 
-        #player-controls {
-            display: flex;
-            align-items: center;
-            justify-content: flex-end;
-        }
+            #btn-play-pause {
+                color: var(--color);
+            }
 
-        #btn-play-pause {
-            color: var(--color);
-        }
+            #btn-play-pause:hover, #volume-control:hover{
+                opacity: 0.7;
+            }
 
-        #btn-play-pause:hover, #volume-control:hover{
-            opacity: 0.7;
-        }
+            #volume-control {
+                display: flex;
+                align-items: center;
+                gap: 2px;
+                opacity: 1;
+                transition: opacity 0.2s ease;
+                height: 2.4rem;
+            }
 
-        #volume-control {
-            display: flex;
-            align-items: center;
-            gap: 2px;
-            opacity: 1;
-            transition: opacity 0.2s ease;
-            height: 2.4rem;
-        }
+            .square-filled {
+                width: 0.75em;
+                aspect-ratio: 1/1;
+                background-color: var(--color);
+            }
 
-        .square-filled {
-            width: 0.75em;
-            aspect-ratio: 1/1;
-            background-color: var(--color);
-        }
+            .square-empty {
+                width: 0.75em;
+                aspect-ratio: 1/1;
+                border: 2px solid var(--color);
+                background-color: transparent;
+            }
 
-        .square-empty {
-            width: 0.75em;
-            aspect-ratio: 1/1;
-            border: 2px solid var(--color);
-            background-color: transparent;
-        }
+        </style>
 
-    </style>
-
-    <div id="player">
-        <section id="player-controls">
-            <button id="btn-play-pause"><svg class="icon" fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"> <path d="M10 20H8V4h2v2h2v3h2v2h2v2h-2v2h-2v3h-2v2z" fill="currentColor"/> </svg></button>
-            <div id="volume-control">
-                <button></button>
-                <button></button>
-                <button></button>
-                <button></button>
-                <button></button>
-            </div>
-        </section>
-    </div>
-</template>
+        <div tabindex="0"  id="player" class="player-part">
+            <section class="player-part" id="controls">
+                <button class="player-part" id="btn-play-pause"><svg class="icon" fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"> <path d="M10 20H8V4h2v2h2v3h2v2h2v2h-2v2h-2v3h-2v2z" fill="currentColor"/> </svg></button>
+                <div class="player-part" id="volume-control">
+                    <button class="player-part"></button>
+                    <button class="player-part"></button>
+                    <button class="player-part"></button>
+                    <button class="player-part"></button>
+                    <button class="player-part"></button>
+                </div>
+            </section>
+        </div>
+    </template>
     
 </html>
